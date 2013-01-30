@@ -1,34 +1,63 @@
 module Core
   module FlatMap
     class Mapper::Factory
-      def initialize(name, options = {})
-        @name, @options = name, options
+      def initialize(identifier, options = {})
+        @identifier, @options = identifier, options
+      end
+
+      def traited?
+        @identifier.is_a?(Class)
+      end
+
+      def name
+        traited? ? nil : @identifier
+      end
+
+      def trait_name
+        @options[:trait] if traited?
+      end
+
+      def traits
+        Array(@options[:traits]).compact
       end
 
       def mapper_class
-        class_name = @options[:mapper_class_name] || "#{@name.to_s.camelize}Mapper"
+        return @identifier if traited?
+
+        class_name = @options[:mapper_class_name] || "#{name.to_s.camelize}Mapper"
         class_name.constantize
       end
 
       def fetch_target(mapper)
-        mapper_target = mapper.target
-        target_from_association(mapper_target) || target_from_name(mapper_target)
+        owner_target = mapper.target
+
+        return owner_target if traited?
+
+        target_from_association(owner_target) || target_from_name(owner_target)
       end
 
-      def target_from_association(target)
-        return unless target.kind_of?(ActiveRecord::Base)
-        return unless (association = target.association(@name)).present?
-        if association.reflection.macro == :has_one && association.reflection.options[:is_current]
-          target.send("effective_#{@name}")
+      def target_from_association(owner_target)
+        return unless owner_target.kind_of?(ActiveRecord::Base)
+        return unless (reflection = owner_target.class.reflect_on_association(name)).present?
+
+        if reflection.macro == :has_one && reflection.options[:is_current]
+          owner_target.send("effective_#{name}")
         end
       end
 
       def target_from_name(target)
-        target.send(@name)
+        target.send(name)
       end
 
       def create(mapper)
-        mapper_class.new(fetch_target(mapper))
+        mapper_class.new(fetch_target(mapper), *traits)
+      end
+
+      def required_for_any_trait?(traits)
+        return true unless traited?
+
+        traits.include?(trait_name) ||
+          mapper_class.mountings.any?{ |factory| factory.traited? && factory.required_for_any_trait?(traits) }
       end
     end
   end

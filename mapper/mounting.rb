@@ -29,6 +29,7 @@ module Core
         params
       end
 
+      # Overloaded by {Traits}
       def mountings
         @mountings ||= self.class.mountings.map{ |factory| factory.create(self) }
       end

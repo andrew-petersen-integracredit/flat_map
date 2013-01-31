@@ -34,6 +34,22 @@ module Core
         @mountings ||= self.class.mountings.map{ |factory| factory.create(self) }
       end
       private :mountings
+
+      # def all_mountings
+      #   mountings.dup.concat(mountings.map(&:all_mountings)).flatten
+      # end
+      # private :all_mountings
+
+      def all_mappings
+        return all_nested_mappings unless owned?
+        owner.all_mappings
+      end
+      protected :all_mappings
+
+      def all_nested_mappings
+        (mappings + mountings.map(&:all_nested_mappings)).flatten
+      end
+      protected :all_nested_mappings
     end
   end
 end

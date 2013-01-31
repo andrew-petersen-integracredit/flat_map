@@ -14,7 +14,7 @@ module Core
       end
 
       def trait_name
-        @options[:trait] if traited?
+        @options[:trait_name] if traited?
       end
 
       def traits
@@ -40,8 +40,11 @@ module Core
         return unless owner_target.kind_of?(ActiveRecord::Base)
         return unless (reflection = owner_target.class.reflect_on_association(name)).present?
 
-        if reflection.macro == :has_one && reflection.options[:is_current]
+        case
+        when reflection.macro == :has_one && reflection.options[:is_current]
           owner_target.send("effective_#{name}")
+        when reflection.macro == :has_one || reflection.macro == :belongs_to
+          owner_target.send(name) || owner_target.send("build_#{name}")
         end
       end
 
@@ -50,7 +53,9 @@ module Core
       end
 
       def create(mapper)
-        mapper_class.new(fetch_target(mapper), *traits)
+        new_one = mapper_class.new(fetch_target(mapper), *traits)
+        new_one.owner = mapper if traited?
+        new_one
       end
 
       def required_for_any_trait?(traits)

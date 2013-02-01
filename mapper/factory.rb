@@ -60,8 +60,8 @@ module Core
         target.send(name)
       end
 
-      def create(mapper)
-        new_one = mapper_class.new(fetch_target(mapper), *traits)
+      def create(mapper, *owner_traits)
+        new_one = mapper_class.new(fetch_target(mapper), *(traits + owner_traits).uniq)
         new_one.owner = mapper if traited?
         new_one
       end

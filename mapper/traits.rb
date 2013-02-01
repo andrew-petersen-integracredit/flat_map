@@ -15,7 +15,7 @@ module Core
       def mountings
         @mountings ||= begin
           mountings = self.class.mountings.reject{ |factory| factory.traited? && !factory.required_for_any_trait?(traits) }
-          mountings.map{ |factory| factory.create(self) }
+          mountings.map{ |factory| factory.create(self, *traits) }
         end
       end
       #private :mountings

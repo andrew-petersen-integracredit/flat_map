@@ -12,13 +12,14 @@ module Core
       autoload :Traits
       autoload :Factory
       autoload :ReaderMethods
+      autoload :ModelMethods
 
       include Mapping
       include Mounting
       include Traits
       include ReaderMethods
-
       include ActiveModel::Validations
+      include ModelMethods
 
       attr_reader :target, :traits
       attr_accessor :owner
@@ -36,20 +37,6 @@ module Core
       def owned?
         owner.present?
       end
-
-      def valid?
-        res = super
-        mounted_res = all_mountings.map(&:valid?).all?
-        consolidate_errors!
-        res && mounted_res
-      end
-
-      def consolidate_errors!
-        mountings.map(&:errors).each do |errs|
-          errors.messages.merge!(errs.to_hash){ |k, old, new| old.concat(new) }
-        end
-      end
-      private :consolidate_errors!
     end
   end
 end

@@ -18,7 +18,7 @@ module Core
           mountings.map{ |factory| factory.create(self) }
         end
       end
-      private :mountings
+      #private :mountings
     end
   end
 end

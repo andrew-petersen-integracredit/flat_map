@@ -38,6 +38,14 @@ module Core
 
       def target_from_association(owner_target)
         return unless owner_target.kind_of?(ActiveRecord::Base)
+
+        # if @options.key?(:reflection) && @options.key?(:method)
+        #   return owner_target.send(@options[:reflection]).send(@options[:method])
+        # end
+        if @options.key?(:mounting_point)
+          return @options[:mounting_point].call(owner_target)
+        end
+
         return unless (reflection = owner_target.class.reflect_on_association(name)).present?
 
         case

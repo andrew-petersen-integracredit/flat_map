@@ -43,7 +43,7 @@ module Core
       def mappings
         @mappings ||= self.class.mappings.map{ |factory| factory.create(self) }
       end
-      private :mappings
+      #private :mappings
     end
   end
 end

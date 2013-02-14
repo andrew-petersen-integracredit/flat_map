@@ -3,6 +3,10 @@ module Core
     module Mapper::ModelMethods
       extend ActiveSupport::Concern
 
+      included do
+        define_callbacks :save
+      end
+
       module ClassMethods
         def build(*traits)
           new(target_class.new, *traits)
@@ -38,13 +42,23 @@ module Core
         !!(save if valid?)
       end
 
-      def save
-        res = target.respond_to?(:save) ? target.save : true
-        mountings.each do |mapper|
-          break unless res
-          res = mapper.save
+      def write(params)
+        params.each do |name, value|
+          self.send("#{name}=", value)
         end
-        res
+      end
+
+      def save
+        ActiveRecord::Base.transaction do
+          run_callbacks :save do
+            res = target.respond_to?(:save) ? target.save : true
+            mountings.each do |mapper|
+              break unless res
+              res = mapper.save
+            end
+            res
+          end
+        end
       end
 
       def valid?

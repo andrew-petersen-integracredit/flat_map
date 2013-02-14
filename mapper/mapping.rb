@@ -4,7 +4,7 @@ module Core
       extend ActiveSupport::Concern
 
       module ClassMethods
-        MAPPING_OPTIONS = [:reader, :writer, :format, :enum].freeze
+        MAPPING_OPTIONS = [:reader, :writer, :format].freeze
 
         def map(*args)
           mapping_options = args.extract_options!
@@ -27,6 +27,7 @@ module Core
         end
       end
 
+      # Overloaded by {ModelMethods}
       def write(params)
         mappings.each do |mapping|
           mapping.write_from_params(params)
@@ -43,7 +44,7 @@ module Core
       def mappings
         @mappings ||= self.class.mappings.map{ |factory| factory.create(self) }
       end
-      #private :mappings
+      private :mappings
     end
   end
 end

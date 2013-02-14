@@ -11,18 +11,20 @@ module Core
       autoload :Mounting
       autoload :Traits
       autoload :Factory
-      autoload :ReaderMethods
+      autoload :AttributeMethods
       autoload :ModelMethods
+      autoload :Skipping
 
       include Mapping
       include Mounting
       include Traits
-      include ReaderMethods
+      include AttributeMethods
       include ActiveModel::Validations
       include ModelMethods
+      include Skipping
 
       attr_reader :target, :traits
-      attr_accessor :owner
+      attr_accessor :owner, :name
 
       def initialize(target, *traits)
         raise NoTargetError.new(self) unless target.present?

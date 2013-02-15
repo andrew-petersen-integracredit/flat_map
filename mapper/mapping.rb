@@ -4,7 +4,7 @@ module Core
       extend ActiveSupport::Concern
 
       module ClassMethods
-        MAPPING_OPTIONS = [:reader, :writer, :format].freeze
+        MAPPING_OPTIONS = [:reader, :writer, :format, :multiparam].freeze
 
         def map(*args)
           mapping_options = args.extract_options!

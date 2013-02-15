@@ -9,6 +9,7 @@ module Core
 
       attr_reader :mapper, :name, :target_attribute
       attr_reader :reader, :writer
+      attr_reader :multiparam
 
       delegate :target, :to => :mapper
       delegate :write,  :to => :writer, :allow_nil => true
@@ -16,9 +17,14 @@ module Core
 
       def initialize(*args)
         @mapper, @name, @target_attribute, options = args
+        @multiparam = options[:multiparam]
 
         fetch_reader(options)
         fetch_writer(options)
+      end
+
+      def multiparam?
+        !!@multiparam
       end
 
       def write_from_params(params)

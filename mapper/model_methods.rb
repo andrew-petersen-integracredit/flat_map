@@ -43,6 +43,8 @@ module Core
       end
 
       def write(params)
+        extract_multiparams!(params)
+
         params.each do |name, value|
           self.send("#{name}=", value)
         end
@@ -74,6 +76,27 @@ module Core
         end
       end
       private :consolidate_errors!
+
+      def extract_multiparams!(params)
+        all_mappings.select(&:multiparam?).each do |mapping|
+          param_keys = params.keys.
+            select{ |k| k.to_s =~ /#{mapping.name}\(\d+[isf]\)/ }.
+            sort_by{ |k| k.to_s[/\((\d+)\w*\)/, 1].to_i }
+
+          next if param_keys.empty?
+
+          args = param_keys.inject([]) do |values, key|
+            value = params.delete key
+            type  = key[/\(\d+(\w*)\)/, 1]
+            value = value.send("to_#{type}") unless type.blank?
+
+            values.push value
+            values
+          end
+
+          params[mapping.name] = mapping.multiparam.new(*args) rescue nil
+        end
+      end
     end
   end
 end

@@ -1,6 +1,8 @@
 module Core
   module FlatMap
     module Mapper::AttributeMethods
+      # Lazily define reader and writer methods for all mappings available
+      # to the mapper, and extend +self+ with it.
       def method_missing(name, *args, &block)
         return super if @attribute_methods_defined
 
@@ -14,6 +16,11 @@ module Core
         send(name, *args, &block)
       end
 
+      # Define anonymous module with reader and writer methods for
+      # all the +mappings+ being passed
+      #
+      # @param [Array<Core::FlatMap::Mapping>] mappings list of mappings
+      # @return [Module] module with method definitions
       def attribute_methods(mappings)
         Module.new do
           mappings.each do |mapping|

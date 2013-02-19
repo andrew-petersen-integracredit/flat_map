@@ -7,17 +7,29 @@ module Core
 
         include Formats
 
+        # Initializes reader with +mapping+ and +format+
+        #
+        # @param [Core::FlatMap::Mapping] mapping
+        # @param [Symbol] format
+        def initialize(mapping, format)
+          @mapping, @format = mapping, format
+        end
+
+        # Reads the value just like the {Basic} reader does, but
+        # additionally sends returned value to its format method
+        #
+        # @return [Object] formatted value
         def read
           format_value super
         end
 
-        def format
-          @options[:format]
-        end
-        private :format
-
+        # Sends +value+ to one of format method, defined in {Format}
+        # module and specified on reader initialization
+        #
+        # @param [Object] value
+        # @return [Object] formatted value
         def format_value(value)
-          send(format, value)
+          send(@format, value)
         end
         private :format_value
       end

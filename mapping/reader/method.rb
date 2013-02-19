@@ -4,14 +4,21 @@ module Core
       class Method < Basic
         delegate :mapper, :to => :mapping
 
-        def read
-          mapper.send(method, mapping)
+        # Initializes reader with +mapping+ and +method+
+        #
+        # @param [Core::FlatMap::Mapping] mapping
+        # @param [Symbol] method name
+        def initialize(mapping, method)
+          @mapping, @method = mapping, method
         end
 
-        def method
-          @options[:reader]
+        # Sends <tt>@method</tt> to mapping's mapper, passing
+        # mapping itself to it
+        #
+        # @return [Object] value returned by reader
+        def read
+          mapper.send(@method, mapping)
         end
-        private :method
       end
     end
   end

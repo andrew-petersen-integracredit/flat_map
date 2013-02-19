@@ -8,40 +8,89 @@ module Core
       end
 
       module ClassMethods
+        # Creates a new mapper object wrapped around new instance of its
+        # +target_class+, with a list of passed +traits+ applied to it
+        #
+        # @param [*Symbol] traits
+        # @return [Core::FlatMap::Mapper] mapper
         def build(*traits)
           new(target_class.new, *traits)
         end
 
+        # Find a record of the +target_class+ by +id+ and use it as a
+        # target for a new mapper, with a list of passed +traits+ applied
+        # to it.
+        #
+        # @param [#to_i] id of the record
+        # @param [*Symbol] traits
+        # @return [Core::FlatMap::Mapper] mapper
         def find(id, *traits)
           new(target_class.find(id), *traits)
         end
 
+        # Fetch a class for the target of the mapper
+        #
+        # @return [Class] class
         def target_class
           target_class_name.constantize
         end
 
+        # Writer of the target class name. Allows manual control over target
+        # class of the mapper, for example:
+        #
+        #   class CustomerMapper
+        #     self.target_class_name = 'Customer::Active'
+        #   end
+        #
+        # @param [String] class_name
+        # @return [String] class_name
         def target_class_name=(class_name)
           @target_class_name = class_name
         end
 
+        # Return a name of the target class. Fetches it by name of the +self+
+        # if it is undefined.
+        #
+        # @return [String] class_name
         def target_class_name
           @target_class_name ||= self.name[/^(\w+)Mapper.*$/, 1]
         end
       end
 
+      # Return a 'mapper' string as a model_name. Used by Rails FormBuilder
+      #
+      # @return [String]
       def model_name
         'mapper'
       end
 
+      # Delegate to target's #to_key method
+      # @return [String]
       def to_key
         target.to_key
       end
 
+      # Write a passed set of +params+, then try to save the model if +self+
+      # passes validation. Saving is performed in a transaction
+      #
+      # @param [Hash] params
+      # @return [Boolean]
       def apply(params)
         write(params)
-        !!(save if valid?)
+        res = if valid?
+          ActiveRecord::Base.transaction do
+            save
+          end
+        end
+        !!res
       end
 
+      # Extracts multiparam values from the passed +params+, then uses resulted
+      # hash to assign values to target. Assignment is performed by sending
+      # writer methods to +self+ that correspond to keys in resulted +params+ hash
+      #
+      # @param [Hash] params
+      # @return [Hash] params
       def write(params)
         extract_multiparams!(params)
 
@@ -50,19 +99,28 @@ module Core
         end
       end
 
+      # Try to save the target and send a +save+ method to all mounted mappers.
+      # Return +false+ if that chain of +save+ calls returns true on any of
+      # it's elements. Return +true+ otherwise.
+      #
+      # Saving is performed as a callback.
+      #
+      # @return [Boolean]
       def save
-        ActiveRecord::Base.transaction do
-          run_callbacks :save do
-            res = target.respond_to?(:save) ? target.save : true
-            mountings.each do |mapper|
-              break unless res
-              res = mapper.save
-            end
-            res
+        run_callbacks :save do
+          res = target.respond_to?(:save) ? target.save : true
+          mountings.each do |mapper|
+            break unless res
+            res = mapper.save
           end
+          res
         end
       end
 
+      # Return +true+ if mapper is valid, i.e. if it is valid itself, and if
+      # all mounted mappers (traits and other mappers) are valid also
+      #
+      # @return [Boolean]
       def valid?
         res = super
         mounted_res = all_mountings.map(&:valid?).all?
@@ -70,6 +128,9 @@ module Core
         res && mounted_res
       end
 
+      # Consolidate errors of all mounted mappers to a set of errors of +self+
+      #
+      # @return [Array<ActiveModel::Errors>]
       def consolidate_errors!
         mountings.map(&:errors).each do |errs|
           errors.messages.merge!(errs.to_hash){ |k, old, new| old.concat(new) }
@@ -77,6 +138,13 @@ module Core
       end
       private :consolidate_errors!
 
+      # Extract Rails multiparam parameters from the +params+, modifying
+      # original hash. Behaves somewhat like #{ActiveRecord::AttributeAssignment#extract_callstack_for_multiparameter_attributes}
+      # See this method for some details.
+      #
+      # @param [Hash] params
+      # @return [Array<Core::FlatMap::Mapping>] return value is not used, original
+      #   +params+ hash is modified instead and used later on.
       def extract_multiparams!(params)
         all_mappings.select(&:multiparam?).each do |mapping|
           param_keys = params.keys.
@@ -97,6 +165,7 @@ module Core
           params[mapping.name] = mapping.multiparam.new(*args) rescue nil
         end
       end
+      private :extract_multiparams!
     end
   end
 end

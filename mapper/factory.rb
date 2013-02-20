@@ -1,5 +1,9 @@
 module Core
   module FlatMap
+    # Mapper factory objects are used to store mounting and trait definitions
+    # and to instantiate and setup corresponding mapper objects thereafter.
+    # Factory objects are stored by mapper classes in opposite to actual
+    # mounted mappers that are stored by mapper objects themselves.
     class Mapper::Factory
       # Initializes factory with an identifier (name of a mounted mapper,
       # or the actual class for a trait) and a set of options. Those args

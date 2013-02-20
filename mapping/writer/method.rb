@@ -1,6 +1,8 @@
 module Core
   module FlatMap
     module Mapping::Writer
+      # Method writer calls a method defined by mapper and sends mapping
+      # and value to it as arguments
       class Method < Basic
         delegate :mapper, :to => :mapping
 

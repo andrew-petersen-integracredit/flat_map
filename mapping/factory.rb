@@ -1,5 +1,7 @@
 module Core
   module FlatMap
+    # Factory objects store mapping definitions within mapper class and are
+    # used to eventually generate mapping objects for a particular mapper.
     class Mapping::Factory
       # Simply stores all arguments necessary to create a
       # new mapping for a specific mapper

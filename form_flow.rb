@@ -1,6 +1,46 @@
 module Core
   module FlatMap
+    # FormFlow classes are used as helper classes to use various setup of mappers
+    # during multi-step form submission process in your controller. Originally,
+    # each form flow uses the same mapper object on every step and is highly
+    # coupled with the controller.
+    #
+    # Each form flow class should define a mapper it will work with via <tt>:mount</tt>
+    # method call and a set of steps via <tt>:step</tt> method calls.
+    #
+    # Each step within a flow is defined as a set of traits to be applied to
+    # mapper object created at a this step, provided by an optional callback block
+    # that will be called if step was successfully submitted. Controller and flow
+    # object will be passed to this block
+    #
+    # Example
+    #
+    #   class MyRegFlow < Core::FlatMap::FormFlow
+    #     mount :customer_account
+    #   
+    #     initially do |controller, flow|
+    #       flow.mapper.write \
+    #         :brand                 => Customer.current_brand,
+    #         :password              => 'secret',
+    #         :password_confirmation => 'secret'
+    #     end
+    #   
+    #     step :traits => :with_email_phones_residence do |controller, flow|
+    #       # customer_account_id is assigned automatically
+    #       controller.session[:customer_id] = flow.customer_account.customer.id
+    #     end
+    #   
+    #     step :traits => :with_vehicle
+    #   
+    #     step :traits => :with_employment_work_phone_ssn
+    #   
+    #     step :traits => :with_new_bank_account do |controller, flow|
+    #       controller.session[:registered] = true
+    #     end
+    #   end
     class FormFlow
+      # Encapsulates Step definition for each step defined within
+      # particular FormFlow
       class StepSetup < Struct.new(:options, :setup)
         delegate :call, :[], :to => :setup
 

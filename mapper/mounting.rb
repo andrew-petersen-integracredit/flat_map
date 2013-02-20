@@ -1,8 +1,16 @@
 module Core
   module FlatMap
+    # This module hosts definitions required for mounting functionality
+    # of the mappers. This includes mounting definition methods, overloaded
+    # +read+ and +write+ methods to make them aware of mounted mappers and
+    # other methods.
+    #
+    # Also, +method_missing+ method is defined here that will delegate missing
+    # method to the very first mounted mapper that responds to it.
     module Mapper::Mounting
       extend ActiveSupport::Concern
 
+      # Mounting class macros
       module ClassMethods
         # Add a mounting factory to a list of factories of a class
         # These factories are used to create actual mounted objects,

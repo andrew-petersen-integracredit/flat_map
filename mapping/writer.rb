@@ -1,5 +1,7 @@
 module Core
   module FlatMap
+    # Writer module hosts various writer classes that are used
+    # by mappings to assign values to target of associated mapper.
     module Mapping::Writer
       extend ActiveSupport::Autoload
 

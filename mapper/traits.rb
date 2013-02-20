@@ -1,8 +1,14 @@
 module Core
   module FlatMap
+    # This small module allows mappers to define traits, which technically
+    # means mounting anonymous mappers, attached to host one.
+    #
+    # Also, Core::FlatMap::Mapper::Mounting#mountings completely overridden
+    # here to support special trait behavior.
     module Mapper::Traits
       extend ActiveSupport::Concern
 
+      # Traits class macros
       module ClassMethods
         # Defines a trait for a mapper class. A trait in terms of implementation is nothing
         # more than a mounted mapper, owned by host mapper. It shares all mappings with it.

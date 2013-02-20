@@ -1,6 +1,8 @@
 module Core
   module FlatMap
     module Mapping::Reader
+      # Basic reader simply sends mapped attribute to the target
+      # and returns result value
       class Basic
         attr_reader :mapping
 

@@ -1,8 +1,12 @@
 module Core
   module FlatMap
+    # This module hosts all definitions required to define and use mapping
+    # functionality within mapper classes. This includes mapping definition
+    # methods and basic reading and writing methods.
     module Mapper::Mapping
       extend ActiveSupport::Concern
 
+      # Mapping class macros
       module ClassMethods
         # mapping-modifier options to distinguish options from mappings
         # themselves

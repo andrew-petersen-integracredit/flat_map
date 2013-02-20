@@ -1,5 +1,7 @@
 module Core
   module FlatMap
+    # Encapsulates mapping concept used by mappers. Each mapping belongs to
+    # a particular mapper and has its own reader and writer objects.
     class Mapping
       extend ActiveSupport::Autoload
 

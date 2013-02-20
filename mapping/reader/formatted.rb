@@ -1,6 +1,10 @@
 module Core
   module FlatMap
     module Mapping::Reader
+      # Formatted reader reads the value the same as Basic reader does, but
+      # additionally performs value postprocessing. All processing methods
+      # are defined within {Formatted::Formats} module. The method is chosen
+      # based on :format option when mapping is defined
       class Formatted < Basic
         extend ActiveSupport::Autoload
         autoload :Formats

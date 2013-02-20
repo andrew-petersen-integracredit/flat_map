@@ -1,5 +1,12 @@
 module Core
   module FlatMap
+    # This module provides some integration between mapper and it's target,
+    # which is usually an ActiveRecord model, as well as some integration
+    # between mapper and Rails forms.
+    #
+    # In particular, validation and save methods are defined here. And
+    # <tt>save</tt> method itself is defined as a callback. Also, Rails
+    # multiparam attributes extraction is defined within this module.
     module Mapper::ModelMethods
       extend ActiveSupport::Concern
 
@@ -7,6 +14,7 @@ module Core
         define_callbacks :save
       end
 
+      # ModelMethods class macros
       module ClassMethods
         # Creates a new mapper object wrapped around new instance of its
         # +target_class+, with a list of passed +traits+ applied to it

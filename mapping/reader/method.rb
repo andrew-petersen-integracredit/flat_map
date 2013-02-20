@@ -1,6 +1,8 @@
 module Core
   module FlatMap
     module Mapping::Reader
+      # Method mapper calls a method, defined by mapper, sending
+      # mapping object to it as an argument.
       class Method < Basic
         delegate :mapper, :to => :mapping
 

@@ -1,5 +1,10 @@
 module Core
   module FlatMap
+    # This module allows mappers to return and assign values via method calls
+    # which names correspond to names of mappings defined within the mapper.
+    #
+    # This methods are defined within anonymous module that will extend
+    # mapper on first usage of this methods.
     module Mapper::AttributeMethods
       # Lazily define reader and writer methods for all mappings available
       # to the mapper, and extend +self+ with it.

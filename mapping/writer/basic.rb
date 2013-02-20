@@ -1,6 +1,8 @@
 module Core
   module FlatMap
     module Mapping::Writer
+      # Basic writer simply calls target's attribute assignment method
+      # passing to it value being written
       class Basic
         attr_reader :mapping
 

@@ -1,5 +1,7 @@
 module Core
   module FlatMap
+    # This helper module provides helper functionality that allow to
+    # exclude specific mapper from a processing chain.
     module Mapper::Skipping
       # Mark self as skipped, i.e. it will not be subject of
       # validation and saving chain.

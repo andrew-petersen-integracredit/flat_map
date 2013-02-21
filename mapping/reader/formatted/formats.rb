@@ -1,8 +1,8 @@
 module Core
   module FlatMap
     module Mapping::Reader
-      # Hosts variaous formats that can be applied to a values
-      # read by mappings for postprocessing
+      # Hosts various formats that can be applied to a values read by mappings
+      # for post-processing.
       module Formatted::Formats
         # Pass +value+ to <tt>Core::I18n::l</tt> method
         def i18n_l(value)

@@ -36,7 +36,9 @@ module Core
       #   object of which will be instantiated on writing
       #   multiparam attribute passed from the Rails form
       def initialize(*args)
-        @mapper, @name, @target_attribute, options = args
+        options = args.last.is_a?(Hash) ? args.last : {}
+
+        @mapper, @name, @target_attribute = args
         @multiparam = options[:multiparam]
 
         fetch_reader(options)

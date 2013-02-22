@@ -130,7 +130,8 @@ module Core
       #
       # @return [Boolean]
       def valid?
-        res = trait_mountings.map(&:valid?).all? && super
+        res = trait_mountings.map(&:valid?).all?
+        res = super && res # we do want to call super
         mounting_res = mapper_mountings.map(&:valid?).all?
         consolidate_errors!
         res && mounting_res

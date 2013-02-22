@@ -26,7 +26,7 @@ module Core
     #     map :name_suffix, :format => :enum
     #     map :password, :reader => false, :writer => :assign_password
     #     
-    #     # Or you can combine all definitions alltogether if they all are common:
+    #     # Or you can combine all definitions together if they all are common:
     #     map :first_name, :last_name, :dob => :date_of_birth, :suffix => :name_suffix, :reader => :my_custom_reader
     #   end
     #

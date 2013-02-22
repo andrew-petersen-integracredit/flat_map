@@ -34,7 +34,23 @@ module Core
           mountings.map{ |factory| factory.create(self, *traits) }
         end
       end
-      private :mountings
+      protected :mountings
+
+      # Return only mountings that are actually traits for host mapper
+      #
+      # @return [Array<Core::FlatMap::Mapper>]
+      def trait_mountings
+        mountings.select{ |m| m.owned? }
+      end
+      protected :trait_mountings
+
+      # Return only mountings that correspond to external mappers
+      #
+      # @return [Array<Core::FlatMap::Mapper>]
+      def mapper_mountings
+        mountings.select{ |m| !m.owned? }
+      end
+      protected :mapper_mountings
     end
   end
 end

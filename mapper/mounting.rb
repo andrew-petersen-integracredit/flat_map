@@ -64,7 +64,7 @@ module Core
       def mountings
         @mountings ||= self.class.mountings.map{ |factory| factory.create(self) }
       end
-      private :mountings
+      protected :mountings
 
       # Return mapping with a name that corresponds to passed +mounting_name+,
       # if it exists

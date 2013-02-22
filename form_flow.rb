@@ -136,7 +136,6 @@ module Core
       def initialize(controller)
         @controller = controller
         @step = params[:step].try(:to_i) || 1
-        controller.instance_variable_set(:@flow, self)
         initial_setup
         controller_data_prepare
       end
@@ -244,6 +243,13 @@ module Core
         controller.try(:prepare_data_for_step, step)
       end
       private :controller_data_prepare
+
+      # Return view name to render for flow
+      #
+      # @return [String]
+      def form_view_name
+        'new'
+      end
     end
   end
 end

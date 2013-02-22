@@ -116,12 +116,12 @@ module Core
       # @return [Boolean]
       def save
         run_callbacks :save do
-          res = target.respond_to?(:save) ? target.save : true
+          res = true
           mountings.each do |mapper|
             break unless res
             res = mapper.save
           end
-          res
+          res && target.respond_to?(:save) ? target.save(:validate => false) : true
         end
       end
 
@@ -130,10 +130,10 @@ module Core
       #
       # @return [Boolean]
       def valid?
-        res = super
-        mounted_res = all_mountings.map(&:valid?).all?
+        res = trait_mountings.map(&:valid?).all? && super
+        mounting_res = mapper_mountings.map(&:valid?).all?
         consolidate_errors!
-        res && mounted_res
+        res && mounting_res
       end
 
       # Consolidate errors of all mounted mappers to a set of errors of +self+

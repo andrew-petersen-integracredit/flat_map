@@ -147,7 +147,7 @@ module Core
       def initial_setup
         return unless step == 1
         setup = self.class.initially
-        setup[controller, self] if setup.present?
+        setup[controller, self] if setup.present? && setup.have_setup?
       end
 
       # Calls setup block of the last step defined, if present, passing
@@ -156,7 +156,7 @@ module Core
       # @return [Object]
       def final_setup
         setup = self.class.steps.last
-        setup[controller, self] if setup.present?
+        setup[controller, self] if setup.present? && setup.have_setup?
       end
 
       # Fetch and return mapper object.

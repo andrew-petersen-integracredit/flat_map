@@ -57,7 +57,7 @@ module Core
 
       # Fetch target for a mapper being created based on target of a host mapper.
       #
-      # @param [Core::FlatMap::Mapper] host mapper
+      # @param [Core::FlatMap::Mapper] mapper Host mapper
       # @return [Object] target for new mapper
       def fetch_target(mapper)
         owner_target = mapper.target
@@ -116,8 +116,8 @@ module Core
       # is a part of a host mapper, and is 'owned' by it. In other case, assign a name
       # of a factory to it to be able to find it later on.
       #
-      # @param [Core::FlatMap::Mapper] mapper host mapper
-      # @param [*Symbol] traits list of traits to be applied to a newly created mapper
+      # @param [Core::FlatMap::Mapper] mapper Host mapper
+      # @param [*Symbol] owner_traits List of traits to be applied to a newly created mapper
       def create(mapper, *owner_traits)
         new_one = mapper_class.new(fetch_target(mapper), *(traits + owner_traits).uniq)
         if traited?

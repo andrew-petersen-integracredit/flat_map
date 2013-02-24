@@ -197,8 +197,8 @@ module Core
       # used to fetch proper list of mounted mappers. Raises error
       # if target is not specified.
       #
-      # @param [Object] target of mapping
-      # @param [*Symbol] list of traits
+      # @param [Object] target Target of mapping
+      # @param [*Symbol] traits List of traits
       # @raise [Core::FlatMap::Mapper::NoTargetError]
       def initialize(target, *traits)
         raise NoTargetError.new(self) unless target.present?

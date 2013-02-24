@@ -35,10 +35,11 @@ module Core
       # @option [Class] :multiparam specifies multiparam Class,
       #   object of which will be instantiated on writing
       #   multiparam attribute passed from the Rails form
-      def initialize(*args)
-        options = args.last.is_a?(Hash) ? args.last : {}
+      def initialize(mapper, name, target_attribute, options = {})
+        @mapper           = mapper
+        @name             = name
+        @target_attribute = target_attribute
 
-        @mapper, @name, @target_attribute = args
         @multiparam = options[:multiparam]
 
         fetch_reader(options)

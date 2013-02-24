@@ -6,7 +6,7 @@ module Core
       # Simply stores all arguments necessary to create a
       # new mapping for a specific mapper
       #
-      # @params [*Object] args
+      # @param [*Object] args
       def initialize(*args)
         @args = args
       end

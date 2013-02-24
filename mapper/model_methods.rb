@@ -121,7 +121,10 @@ module Core
             break unless res
             res = mapper.save
           end
-          res && target.respond_to?(:save) ? target.save(:validate => false) : true
+          unless owned?
+            res = res && target.respond_to?(:save) ? target.save(:validate => false) : true
+          end
+          res
         end
       end
 

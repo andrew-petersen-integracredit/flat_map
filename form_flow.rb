@@ -147,7 +147,7 @@ module Core
       def initial_setup
         return unless step == 1
         setup = self.class.initially
-        setup[controller, self] if setup.present? && setup.have_setup?
+        setup[controller, self] if setup.present?
       end
 
       # Calls setup block of the last step defined, if present, passing

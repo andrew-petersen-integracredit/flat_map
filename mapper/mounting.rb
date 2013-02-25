@@ -70,8 +70,9 @@ module Core
       # if it exists
       #
       # @return [Core::FlatMap::Mapping, nil]
-      def mounting(mounting_name)
-        mountings.find{ |mount| mount.name == mounting_name }
+      def mounting(mounting_name, deep = true)
+        list = deep ? all_mountings : mountings
+        list.find{ |mount| mount.name == mounting_name }
       end
 
       # Return a list of all mounted mappers, fetching deeply nested mappers

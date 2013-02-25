@@ -137,7 +137,6 @@ module Core
         @controller = controller
         @step = params[:step].try(:to_i) || 1
         initial_setup
-        controller_data_prepare
       end
 
       # Calls a initialization setup block, if present, for the first
@@ -179,7 +178,6 @@ module Core
             final_setup
           else
             post_step_setup
-            controller_data_prepare
             @mapper = nil
           end
         end
@@ -234,15 +232,6 @@ module Core
       def increment_step!
         @step += 1
       end
-
-      # If controller responds to +prepare_data_for_step+ method,
-      # will call it, passing current +step+
-      #
-      # @return [Object]
-      def controller_data_prepare
-        controller.try(:prepare_data_for_step, step)
-      end
-      private :controller_data_prepare
 
       # Return view name to render for flow
       #

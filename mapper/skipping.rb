@@ -36,7 +36,6 @@ module Core
       # @return [Boolean]
       def valid?
         if skipped?
-          target.destroy if target.try(:new_record?)
           true
         else
           super
@@ -48,7 +47,12 @@ module Core
       #
       # @return [Boolean]
       def save
-        skipped? || super
+        if skipped?
+          target.destroy if target.respond_to?(:new_record?) && target.new_record?
+          true
+        else
+          super
+        end
       end
 
       # Marks self as used and then delegated to original

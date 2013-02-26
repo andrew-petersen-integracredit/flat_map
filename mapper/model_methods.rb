@@ -21,8 +21,8 @@ module Core
         #
         # @param [*Symbol] traits
         # @return [Core::FlatMap::Mapper] mapper
-        def build(*traits)
-          new(target_class.new, *traits)
+        def build(*traits, &block)
+          new(target_class.new, *traits, &block)
         end
 
         # Find a record of the +target_class+ by +id+ and use it as a
@@ -32,8 +32,8 @@ module Core
         # @param [#to_i] id of the record
         # @param [*Symbol] traits
         # @return [Core::FlatMap::Mapper] mapper
-        def find(id, *traits)
-          new(target_class.find(id), *traits)
+        def find(id, *traits, &block)
+          new(target_class.find(id), *traits, &block)
         end
 
         # Fetch a class for the target of the mapper

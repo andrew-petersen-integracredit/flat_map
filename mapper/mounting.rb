@@ -19,8 +19,8 @@ module Core
         #
         # @param [*Object] args
         # @return [Array<Core::FlatMap::Mapper::Factory>]
-        def mount(*args)
-          mountings << FlatMap::Mapper::Factory.new(*args)
+        def mount(*args, &block)
+          mountings << FlatMap::Mapper::Factory.new(*args, &block)
         end
 
         # List of mountings (factories) of a class.
@@ -64,7 +64,6 @@ module Core
       def mountings
         @mountings ||= self.class.mountings.map{ |factory| factory.create(self) }
       end
-      protected :mountings
 
       # Return mapping with a name that corresponds to passed +mounting_name+,
       # if it exists

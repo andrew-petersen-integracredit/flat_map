@@ -204,6 +204,10 @@ module Core
         raise NoTargetError.new(self) unless target.present?
 
         @target, @traits = target, traits
+
+        if block_given?
+          singleton_class.trait :extension, &Proc.new
+        end
       end
 
       # Return a simple string representation of +mapper+. Done so to

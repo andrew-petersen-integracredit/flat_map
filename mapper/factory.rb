@@ -12,8 +12,8 @@ module Core
       # @param [Symbol, Class] identifier name of a mapper or mapper class
       #   itself
       # @param [Hash] options
-      def initialize(identifier, options = {})
-        @identifier, @options = identifier, options
+      def initialize(identifier, options = {}, &block)
+        @identifier, @options, @extension = identifier, options, block
       end
 
       # Return +true+ if factory defines a trait
@@ -119,7 +119,7 @@ module Core
       # @param [Core::FlatMap::Mapper] mapper Host mapper
       # @param [*Symbol] owner_traits List of traits to be applied to a newly created mapper
       def create(mapper, *owner_traits)
-        new_one = mapper_class.new(fetch_target(mapper), *(traits + owner_traits).uniq)
+        new_one = mapper_class.new(fetch_target(mapper), *(traits + owner_traits).uniq, &@extension)
         if traited?
           new_one.owner = mapper
         else

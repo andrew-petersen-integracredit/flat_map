@@ -9,6 +9,12 @@ module Core
           super '#before and #after methods require at least one step to be defined via #step method call'
         end
       end
+
+      # Raised when no default mapper was mounted on the flow and
+      # step doesn't specify a mapper to work with
+      class NoMapperError < RuntimeError
+      end
+
       # Encapsulates Step definition for each step defined within
       # particular FormFlow
       class Step < Struct.new(:options, :mapper_extension)
@@ -27,60 +33,12 @@ module Core
         def mapper_name
           options[:mapper]
         end
-
-        # Fetches a mapper object using list of traits defined for the step:
-        # * For the first step will build a mapper with a new record
-        # * For other steps will use mapper with a record, obtained by
-        #   id stored in controller's session
-        #
-        # @return [Core::FlatMap::Mapper]
-        def fetch_mapper(params)
-          mapper_target_id = params[mapper_session_key]
-
-          mapper_target_id.present? ? find_mapper(mapper_target_id) : build_mapper
-        end
-
-        # Create a mapper for a new record
-        #
-        # @return [Core::FlatMap::Mapper]
-        def build_mapper
-          mapper_class.build(*traits, &mapper_extension)
-        end
-
-        # Create a mapper for a persisted record
-        #
-        # @return [Core::FlatMap::Mapper]
-        def find_mapper(target_id)
-          mapper_class.find(target_id, *traits, &mapper_extension)
-        end
-
-        # Fetch a mapper class based on mounted mapper_name
-        #
-        # @return [Class] mapper class
-        def mapper_class
-          "#{mapper_name.to_s.camelize}Mapper".constantize
-        end
-
-        # Fetch a key by which assignment params may be accessed
-        # from +params+ of the controller and applied on the mapper
-        #
-        # @return [String]
-        def mapper_params_key
-          "#{mapper_name}_mapper"
-        end
-
-        # Fetch a session key, by which id of the mapper's target will
-        # be stored in controller's session
-        #
-        # @return [Symbol]
-        def mapper_session_key
-          :"#{mapper_name}_id"
-        end
       end
 
       attr_reader :controller, :step, :mapper
 
-      delegate :params, :to => :controller
+      delegate :params, :session, :to => :controller
+      delegate :mapper_extension, :traits, :to => :current_step
       delegate :target, :to => :mapper
 
       # Define a new step by explicitly specifying name of the mapper
@@ -93,7 +51,7 @@ module Core
       # @option [Symbol, Array<Symbol>] :traits traits of the mapper
       #   to be used on current step
       # @return [Array<Step>]
-      def self.step(options, &block)
+      def self.step(options = {}, &block)
         steps.push Step.new(options, block)
       end
 
@@ -124,20 +82,19 @@ module Core
         @steps ||= []
       end
 
-      # Fetch a key by which assignment params may be accessed
-      # from +params+ of the controller and applied on the mapper
+      # Sets name of the mapper to use on steps by default
       #
-      # @return [String]
-      def self.mapper_params_key
-        "#{@mapper_name}_mapper"
+      # @param [Symbol] mapper_name
+      # @return [Symbol]
+      def self.mount(mapper_name)
+        @mapper_name = mapper_name
       end
 
-      # Fetch a session key, by which id of the mapper's target will
-      # be stored in controller's session
+      # Return a mapper name specified by #mount method
       #
-      # @return [Symbol]
-      def self.mapper_session_key
-        :"#{@mapper_name}_id"
+      # @return [Symbol, nil]
+      def self.mapper_name
+        @mapper_name
       end
 
       # Initialize step with a +controller+ and perform additional processing
@@ -172,7 +129,7 @@ module Core
       #
       # @return [Object]
       def initial_setup
-        return unless step == 1
+        return unless first_step?
 
         tokenizer.clear! if use_tokenizer?
       end
@@ -185,13 +142,13 @@ module Core
       # @return [Object, nil]
       def process
         before_step_setup
-        if mapper.apply(params[current_step.mapper_params_key])
+        if mapper.apply(params[mapper_params_key])
           after_step_setup
           increment_step!
           @mapper = nil unless finished?
           true
         else
-          tokenizer.tokenize_attributes!(mapper) if step == 1 && use_tokenizer?
+          tokenizer.tokenize_attributes!(mapper) if first_step? && use_tokenizer?
         end
       end
 
@@ -200,7 +157,7 @@ module Core
       # @return [Object]
       def before_step_setup
         current_step.before.try(:call, controller, self)
-        tokenizer.prepare_params!(params[current_step.mapper_params_key]) if step == 1 && use_tokenizer?
+        tokenizer.prepare_params!(params[mapper_params_key]) if first_step? && use_tokenizer?
       end
 
       # Calls a step's after processing block, if present
@@ -208,7 +165,7 @@ module Core
       # @return [Object]
       def after_step_setup
         current_step.after.try(:call, controller, self)
-        tokenizer.clear! if step == 1 && use_tokenizer?
+        tokenizer.clear! if first_step? && use_tokenizer?
       end
 
       # Return instance of the setup for the current step number
@@ -222,8 +179,69 @@ module Core
       #
       # @return [Core::FlatMap::Mapper]
       def mapper
-        @mapper ||= current_step.fetch_mapper(controller.session)
+        @mapper ||= fetch_mapper
       end
+
+
+      # Fetches a mapper object using list of traits defined for the step:
+      # * For the first step will build a mapper with a new record
+      # * For other steps will use mapper with a record, obtained by
+      #   id stored in controller's session
+      #
+      # @return [Core::FlatMap::Mapper]
+      def fetch_mapper
+        first_step? ? build_mapper : find_mapper
+      end
+
+      # Create a mapper for a new record
+      #
+      # @return [Core::FlatMap::Mapper]
+      def build_mapper
+        mapper_class.build(*traits, &mapper_extension)
+      end
+
+      # Create a mapper for a persisted record
+      #
+      # @return [Core::FlatMap::Mapper]
+      def find_mapper
+        target_id = session[mapper_session_key]
+        mapper_class.find(target_id, *traits, &mapper_extension)
+      end
+
+      # Fetch a mapper class based on current_mapper_name
+      #
+      # @return [Class] mapper class
+      def mapper_class
+        "#{current_mapper_name.to_s.camelize}Mapper".constantize
+      end
+
+      # Name of the mapper to use on current step. Specified in options
+      # on step definition, and defaults to value specified by #mount method
+      #
+      # @return [Symbol]
+      def current_mapper_name
+        (current_step.mapper_name || self.class.mapper_name).tap do |name|
+          raise NoMapperError unless name.present?
+        end
+      end
+
+      # Fetch a key by which assignment params may be accessed
+      # from +params+ of the controller and applied on the mapper
+      #
+      # @return [String]
+      def mapper_params_key
+        "#{current_mapper_name}_mapper"
+      end
+
+      # Fetch a session key, by which id of the mapper's target will
+      # be stored in controller's session
+      #
+      # @return [Symbol]
+      def mapper_session_key
+        :"#{current_mapper_name}_id"
+      end
+
+
 
       # Return total number of steps defined in class
       #
@@ -237,6 +255,13 @@ module Core
       # @return [Boolean]
       def finished?
         step > total_steps
+      end
+
+      # Return +true+ if currently processing the very first step
+      #
+      # @return [Boolean]
+      def first_step?
+        step == 1
       end
 
       # Increment <tt>@step</tt> by one

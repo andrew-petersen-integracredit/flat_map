@@ -27,23 +27,19 @@ module Core
 
       # Overrides {Core::FlatMap::Mapper::ModelMethods#valid?} to
       # force it to return +true+ if +self+ is marked for skipping.
+      #
+      # @return [Boolean]
+      def valid?
+        skipped? || super
+      end
+
+      # Overrides {Core::FlatMap::Mapper::ModelMethods#save} method to
+      # force it to return +true+ if +self+ is marked for skipping.
       # Note that this will also mark target record for
       # destruction if it is a new record. Thus, this
       # record will not be a subject of Rails associated
       # validation procedures, and will not be save as
       # associated record.
-      #
-      # @return [Boolean]
-      def valid?
-        if skipped?
-          true
-        else
-          super
-        end
-      end
-
-      # Overrides {Core::FlatMap::Mapper::ModelMethods#save} method to
-      # force it to return +true+ if +self+ is marked for skipping
       #
       # @return [Boolean]
       def save

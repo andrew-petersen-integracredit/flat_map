@@ -188,7 +188,7 @@ module Core
         tokenizer.clear! if use_tokenizer?
       end
 
-      # Process params from submitted form via mapper. If successfull,
+      # Process params from submitted form via mapper. If successful,
       # will go to the next step, performing additional setup and
       # setting <tt>@mapper</tt> to nil - this will force re-initialization
       # of mapper for a context of a new step
@@ -203,6 +203,7 @@ module Core
           true
         else
           tokenizer.tokenize_attributes!(mapper) if first_step? && use_tokenizer?
+          false
         end
       end
 

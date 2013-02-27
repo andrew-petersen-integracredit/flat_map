@@ -3,10 +3,10 @@ module Core
     # TODO: Write a new RDoc for flows
     class FormFlow
       # Raised when step modifiers are called with no steps defined
-      class NoStepsError < RuntimeError
+      class NoStepError < RuntimeError
         # Initialize error with a message
-        def initialize
-          super '#before and #after methods require at least one step to be defined via #step method call'
+        def initialize(name, class_name)
+          super "Unable to find :#{name} step in #{class_name}"
         end
       end
 
@@ -17,7 +17,7 @@ module Core
 
       # Encapsulates Step definition for each step defined within
       # particular FormFlow
-      class Step < Struct.new(:options, :mapper_extension)
+      class Step < Struct.new(:name, :options, :mapper_extension)
         attr_accessor :before, :after
 
         # Return list of traits associated with a step
@@ -51,8 +51,8 @@ module Core
       # @option [Symbol, Array<Symbol>] :traits traits of the mapper
       #   to be used on current step
       # @return [Array<Step>]
-      def self.step(options = {}, &block)
-        steps.push Step.new(options, block)
+      def self.step(step_name, options = {}, &block)
+        steps.push Step.new(step_name, options, block)
       end
 
       # Specifies a preprocessing block for the last step defined.
@@ -60,9 +60,10 @@ module Core
       # as arguments
       #
       # @return [Proc]
-      def self.before(&block)
-        raise NoStepsError if steps.empty?
-        steps.last.before = block
+      def self.before(name, &block)
+        return before_each(&block) if name == :each
+
+        find_step_by_name(name).before = block
       end
 
       # Specifies a postprocessinf block for the last step defined.
@@ -70,9 +71,39 @@ module Core
       # as arguments
       #
       # @return [Proc]
-      def self.after(&block)
-        raise NoStepsError if steps.empty?
-        steps.last.after = block
+      def self.after(name, &block)
+        return after_each(&block) if name == :each
+
+        find_step_by_name(name).after = block
+      end
+
+      # Return pre-processing setup to be performed before each step.
+      # If the block is passed, it will be assigned as such setup.
+      #
+      # @return [Proc, nil]
+      def self.before_each(&block)
+        return @before_each_setup unless block_given?
+        @before_each_setup = block
+      end
+
+      # Return post-processing setup to be performed after each step.
+      # If the block is passed, it will be assigned as such setup.
+      #
+      # @return [Proc, nil]
+      def self.after_each(&block)
+        return @after_each_setup unless block_given?
+        @after_each_setup = block
+      end
+
+      # Finds particular step in +steps+ by its name. Will raise
+      # {NoStepError} on failure
+      #
+      # @param [Symbol] name
+      # @return [Core::FlatMap::FormFlow::Step]
+      def self.find_step_by_name(name)
+        steps.find{ |step| step.name == name }.tap do |step|
+          raise NoStepError.new(name, self.name) unless step.present?
+        end
       end
 
       # Return list of steps of a class
@@ -97,6 +128,21 @@ module Core
         @mapper_name
       end
 
+      # Shortcut to return desired step by it's name or index
+      #
+      # @param [Integer, Symbol] index_or_name
+      # @return [Core::FlatMap::FormFlow::Step, nil]
+      def self.[](index_or_name)
+        case index_or_name
+        when Symbol
+          find_step_by_name(index_or_name)
+        when Integer
+          steps[index_or_name]
+        else
+          nil
+        end
+      end
+
       # Initialize step with a +controller+ and perform additional processing
       # based on it:
       # * Get the current step from params, or defualt it to 1
@@ -108,6 +154,14 @@ module Core
       def initialize(controller, options = {})
         @controller, @options = controller, options
         @step = params[:step].try(:to_i) || 1
+      end
+
+      # Writer for the <tt>@step</tt> variable.
+      #
+      # @param [#to_i] step_number
+      # @return [Integer] step number
+      def goto_step(step_number)
+        @step = step_number.to_i
       end
 
       # Return true if flow uses {PasswordTokenizer tokenizer} features for the first step
@@ -156,6 +210,7 @@ module Core
       #
       # @return [Object]
       def before_step_setup
+        self.class.before_each.try(:call, controller, self)
         current_step.before.try(:call, controller, self)
         tokenizer.prepare_params!(params[mapper_params_key]) if first_step? && use_tokenizer?
       end
@@ -164,6 +219,7 @@ module Core
       #
       # @return [Object]
       def after_step_setup
+        self.class.after_each.try(:call, controller, self)
         current_step.after.try(:call, controller, self)
         tokenizer.clear! if first_step? && use_tokenizer?
       end
@@ -181,7 +237,6 @@ module Core
       def mapper
         @mapper ||= fetch_mapper
       end
-
 
       # Fetches a mapper object using list of traits defined for the step:
       # * For the first step will build a mapper with a new record
@@ -240,8 +295,6 @@ module Core
       def mapper_session_key
         :"#{current_mapper_name}_id"
       end
-
-
 
       # Return total number of steps defined in class
       #

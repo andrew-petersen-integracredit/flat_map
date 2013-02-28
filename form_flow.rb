@@ -182,7 +182,7 @@ module Core
       # start of the form flow.
       #
       # @return [Object]
-      def initial_setup
+      def initial_setup(params)
         return unless first_step?
 
         tokenizer.clear! if use_tokenizer?

@@ -35,7 +35,7 @@ module Core
         end
       end
 
-      attr_reader :controller, :step, :mapper
+      attr_reader :controller, :step_number, :mapper
 
       delegate :params, :session, :to => :controller
       delegate :mapper_extension, :traits, :to => :current_step
@@ -104,11 +104,27 @@ module Core
         steps[name.to_sym] or raise NoStepError.new(name, self.name)
       end
 
+      # Find particular step in +steps+ by its index. Will raise
+      # {NoStepError} on failure.
+      #
+      # @param [Integer] index
+      # @return [Core::FlatMap::FormFlow::Step]
+      def self.find_step_by_index(index)
+        steps.values[index - 1] or raise NoStepError.new(index, self.name)
+      end
+
       # Return the list of steps for a class.
       #
-      # @return [Array<Step>]
+      # @return [ActiveSupport::OrderedHash]
       def self.steps
         @steps ||= ActiveSupport::OrderedHash.new
+      end
+
+      # Return total number of steps.
+      #
+      # @return [Integer]
+      def self.total_steps
+        steps.length
       end
 
       # Sets the name of the mapper to use on steps by default.
@@ -132,10 +148,10 @@ module Core
       # @return [Core::FlatMap::FormFlow::Step, nil]
       def self.[](index_or_name)
         case index_or_name
-        when Symbol
+        when Symbol, String
           find_step_by_name(index_or_name)
-        when Integer
-          steps[index_or_name]
+        when Fixnum, Integer
+          find_step_by_index(index_or_name)
         else
           nil
         end
@@ -151,15 +167,15 @@ module Core
       # @param [ActionController::Base] controller
       def initialize(controller, options = {})
         @controller, @options = controller, options
-        @step = params[:step].try(:to_i) || 1
+        @step_number = params[:step].try(:to_i) || 1
       end
 
       # Writer for the <tt>@step</tt> variable.
       #
       # @param [#to_i] step_number
       # @return [Integer] step number
-      def goto_step(step_number)
-        @step = step_number.to_i
+      def goto_step_number(step_number)
+        @step_number = step_number.to_i
       end
 
       # Return +true+ if the flow uses {PasswordTokenizer tokenizer} features
@@ -228,7 +244,14 @@ module Core
       #
       # @return [Core::FlatMap::FormFlow::Step]
       def current_step
-        self.class.steps.values[step - 1]
+        self.class.find_step_by_index(step_number)
+      end
+
+      # Return the step name of the current step.
+      #
+      # @return [String]
+      def step_name
+        current_step.try(:name)
       end
 
       # Return an instance of mapper to be used on current step.
@@ -300,28 +323,28 @@ module Core
       #
       # @return [Integer]
       def total_steps
-        self.class.steps.length
+        self.class.total_steps
       end
 
       # Return +true+ if the last step has been processed.
       #
       # @return [Boolean]
       def finished?
-        step > total_steps
+        step_number > total_steps
       end
 
       # Return +true+ if currently processing the very first step.
       #
       # @return [Boolean]
       def first_step?
-        step == 1
+        step_number == 1
       end
 
       # Increment <tt>@step</tt> by one.
       #
       # @return [Integer]
       def increment_step!
-        @step += 1
+        @step_number += 1
       end
 
       # Return the view name to render for the flow.

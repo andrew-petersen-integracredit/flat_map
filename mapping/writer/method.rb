@@ -8,8 +8,8 @@ module Core
       class Method < Basic
         delegate :mapper, :to => :mapping
 
-        # Initializes writer with mapping and method name
-        # that should be called upon mapping's mapper
+        # Initialize the writer with a +mapping+ and +method+ name
+        # that should be called on the mapping's mapper.
         #
         # @param [Core::FlatMap::Mapping] mapping
         # @param [Symbol] method
@@ -17,8 +17,7 @@ module Core
           @mapping, @method = mapping, method
         end
 
-        # Writes a +value+ by sending it, alongside with
-        # mapping itself
+        # Write a +value+ by sending it, along with the mapping itself.
         #
         # @param [Object] value
         # @return [Object] result of writing

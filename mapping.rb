@@ -17,10 +17,10 @@ module Core
       delegate :write,  :to => :writer, :allow_nil => true
       delegate :read,   :to => :reader, :allow_nil => true
 
-      # Initializes mapping, passing to it a +mapper+, which is
-      # a gateway to actual +target+, +name+, which is external
+      # Initialize a mapping, passing to it a +mapper+, which is
+      # a gateway to actual +target+, +name+, which is an external
       # identifier, +target_attribute+, which is used to access
-      # actual information of the +target+, and +options+
+      # actual information of the +target+, and +options+.
       #
       # @param [Core::FlatMap::Mapper] mapper
       # @param [Symbol]                name
@@ -46,16 +46,16 @@ module Core
         fetch_writer(options)
       end
 
-      # Return +true+ if mapping was created with <tt>:multiparam</tt>
-      # option set
+      # Return +true+ if the mapping was created with the <tt>:multiparam</tt>
+      # option set.
       #
       # @return [Boolean]
       def multiparam?
         !!@multiparam
       end
 
-      # Lookups passed hash of params for the key that corresponds
-      # to +name+ of self, and writes it if it is present
+      # Lookup the passed hash of params for the key that corresponds
+      # to the +name+ of +self+, and write it if it is present.
       #
       # @param [Hash] params
       # @return [Object] value assigned
@@ -72,8 +72,8 @@ module Core
         reader ? {name => read} : {}
       end
 
-      # Instantiates +reader+ object based on <tt>:reader</tt>
-      # and <tt>:format</tt> values of +options+
+      # Instantiate a +reader+ object based on the <tt>:reader</tt>
+      # and <tt>:format</tt> values of +options+.
       #
       # @param [Hash] options
       # @return [Core::FlatMap::Mapping::Reader::Basic]
@@ -92,8 +92,8 @@ module Core
       end
       private :fetch_reader
 
-      # Instantiates +writer+ object based on <tt>:writer</tt>
-      # value of +options+
+      # Instantiate a +writer+ object based on the <tt>:writer</tt>
+      # value of +options+.
       #
       # @param [Hash] options
       # @return [Core::FlatMap::Mapping::Writer::Basic]

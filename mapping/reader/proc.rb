@@ -1,11 +1,11 @@
 module Core
   module FlatMap
     module Mapping::Reader
-      # Proc reder accepts a lambda and calls it with target
+      # Proc reader accepts a lambda and calls it with the target
       # as an argument for reading.
       class Proc < Method
-        # Calls a <tt>@method</tt>, which is a {Proc} object,
-        # passing +target+ object to it
+        # Call a <tt>@method</tt>, which is a {Proc} object,
+        # passing the +target+ object to it.
         #
         # @return [Object] value returned by reader's lambda
         def read

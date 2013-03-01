@@ -11,21 +11,21 @@ module Core
         @_skip_processing = true
       end
 
-      # Removes "skip" mark from +self+
+      # Remove "skip" mark from +self+.
       #
       # @return [nil]
       def use!
         @_skip_processing = nil
       end
 
-      # Return +true+ if +self+ was marked for skipping
+      # Return +true+ if +self+ was marked for skipping.
       #
       # @return [Boolean]
       def skipped?
         !!@_skip_processing
       end
 
-      # Overrides {Core::FlatMap::Mapper::ModelMethods#valid?} to
+      # Override {Core::FlatMap::Mapper::ModelMethods#valid?} to
       # force it to return +true+ if +self+ is marked for skipping.
       #
       # @return [Boolean]
@@ -33,12 +33,12 @@ module Core
         skipped? || super
       end
 
-      # Overrides {Core::FlatMap::Mapper::ModelMethods#save} method to
+      # Override {Core::FlatMap::Mapper::ModelMethods#save} method to
       # force it to return +true+ if +self+ is marked for skipping.
-      # Note that this will also mark target record for
+      # Note that this will also mark the target record for
       # destruction if it is a new record. Thus, this
       # record will not be a subject of Rails associated
-      # validation procedures, and will not be save as
+      # validation procedures, and will not be saved as an
       # associated record.
       #
       # @return [Boolean]
@@ -51,8 +51,8 @@ module Core
         end
       end
 
-      # Marks self as used and then delegated to original
-      # {Core::FlatMap::Mapper::ModelMethods#write}
+      # Mark self as used and then delegated to original
+      # {Core::FlatMap::Mapper::ModelMethods#write}.
       def write(*)
         use!
         super

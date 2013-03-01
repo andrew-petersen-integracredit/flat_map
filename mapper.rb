@@ -3,7 +3,7 @@ module Core
     # == Mapper
     #
     # FlatMap mappers are designed to provide complex set of data, distributed over
-    # associated AR models, in a simple form of plain hash. As well as accept plain
+    # associated AR models, in the simple form of a plain hash. They accept a plain
     # hash of the same format and distribute its values over deeply nested AR models.
     #
     # To achieve this goal, Mapper uses three major concepts: Mappings, Mountings and
@@ -27,7 +27,10 @@ module Core
     #     map :password, :reader => false, :writer => :assign_password
     #     
     #     # Or you can combine all definitions together if they all are common:
-    #     map :first_name, :last_name, :dob => :date_of_birth, :suffix => :name_suffix, :reader => :my_custom_reader
+    #     map :first_name, :last_name,
+    #         :dob    => :date_of_birth,
+    #         :suffix => :name_suffix,
+    #         :reader => :my_custom_reader
     #   end
     #
     # When mappings are defined, one can read and write values using them:
@@ -73,7 +76,7 @@ module Core
     #   mapper.read # => {:first_name => 'John', :last_name => 'Smith', :source => nil, :brand => 'TLP'}
     #   mapper.write(params) # Will assign params for both CustomerAccount and Customer records
     #
-    # Following options may be used when mounting mapper:
+    # The following options may be used when mounting a mapper:
     # [<tt>:mounting_point</tt>] Allows to manually specify target for the new mapper. May be very handy
     #                            when target cannot be obviously detected or requires additional setup:
     #                            <tt>mount :title, :mounting_point => lambda{ |customer| customer.title_customers.build.build_title }</tt>

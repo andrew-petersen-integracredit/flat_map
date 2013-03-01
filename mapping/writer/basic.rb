@@ -1,8 +1,8 @@
 module Core
   module FlatMap
     module Mapping::Writer
-      # Basic writer simply calls target's attribute assignment method
-      # passing to it value being written
+      # Basic writer simply calls the target's attribute assignment method
+      # passing to it the value being written.
       class Basic
         attr_reader :mapping
 
@@ -13,8 +13,8 @@ module Core
           @mapping = mapping
         end
 
-        # Simply calls assignment method of the target, passing
-        # +value+ to it
+        # Call the assignment method of the target, passing
+        # the +value+ to it.
         #
         # @param [Object] value
         # @return [Object] result of assignment

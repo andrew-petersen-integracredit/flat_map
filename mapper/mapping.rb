@@ -8,18 +8,18 @@ module Core
 
       # Mapping class macros
       module ClassMethods
-        # mapping-modifier options to distinguish options from mappings
-        # themselves
+        # Mapping-modifier options to distinguish options from mappings
+        # themselves:
         MAPPING_OPTIONS = [:reader, :writer, :format, :multiparam].freeze
 
-        # Define a single or multiple mappings at a time. Usually, a Hash
+        # Define single or multiple mappings at a time. Usually, a Hash
         # is passed in a form {mapping_name => target_attribute}. All keys
         # that are listed under MAPPING_OPTIONS will be extracted and used
         # as modifiers for new mappings.
         #
-        # Also, mapping names may be listed as array that goes before hash.
-        # In that case, it's elements are treated as {mapping_name => mapping_name}
-        # mapping elements
+        # Also, mapping names may be listed as an array preceding the hash.
+        # In that case, its elements are treated as {mapping_name => mapping_name}
+        # mapping elements.
         #
         # Example:
         #   map :brand, :account_source => :source, :format => :enum
@@ -27,15 +27,15 @@ module Core
         #   map :brand => :brand, :format => :enum
         #   map :account_source => :source, :format => :enum
         def map(*args)
-          mapping_options = args.extract_options!
-          mappings = mapping_options.slice!(*MAPPING_OPTIONS)
+          mapping_options     = args.extract_options!
+          mappings            = mapping_options.slice!(*MAPPING_OPTIONS)
           mappings_from_array = args.zip(args).flatten
           mappings.merge!(Hash[*mappings_from_array]) unless mappings_from_array.empty?
 
           define_mappings(mappings, mapping_options)
         end
 
-        # Define a set of +mappings+, passed as {Hash} with +options+ as modifiers.
+        # Define a set of +mappings+, passed as a {Hash} with +options+ as modifiers.
         # Eventually, adds a mapping factories to list of class mappings. Those
         # factory objects are used to create actual mappings for specific mapper
         # object.
@@ -50,7 +50,7 @@ module Core
         end
         private :define_mappings
 
-        # List of class mappings (mapping factories)
+        # List of class mappings (mapping factories).
         #
         # @return [Array<Core::FlatMap::Mapping::Factory>]
         def mappings
@@ -61,7 +61,7 @@ module Core
       # Send passed +params+ +write_from_params+ method of each
       # of the mappings of +self+.
       #
-      # Overloaded in {Mountings}
+      # Overloaded in {Mountings}.
       #
       # @param [Hash] params
       # @return [Hash] params
@@ -73,7 +73,7 @@ module Core
       end
 
       # Send +read_as_params+ method to all mappings associated with
-      # self and consolidate results in a single hash
+      # self. And consolidate results in a single hash.
       #
       # @return [Hash] set of read values
       def read
@@ -82,7 +82,7 @@ module Core
         end
       end
 
-      # Return a list of mappings associated to +self+
+      # Return a list of mappings associated to +self+.
       #
       # @return [Core::FlatMap::Mapping]
       def mappings

@@ -1,22 +1,21 @@
 module Core
   module FlatMap
     module Mapping::Reader
-      # Basic reader simply sends mapped attribute to the target
-      # and returns result value
+      # Basic reader simply sends a mapped attribute to the target
+      # and returns the result value.
       class Basic
         attr_reader :mapping
 
         delegate :target, :target_attribute, :to => :mapping
 
-        # Initializes reader with mapping
+        # Initialize the reader with a mapping.
         #
         # @param [Core::FlatMap::Mapping] mapping
         def initialize(mapping)
           @mapping = mapping
         end
 
-        # Simply sends attribute method to the target and returns
-        # its value
+        # Send the attribute method to the target and return its value.
         #
         # @return [Object] value returned by reading
         def read

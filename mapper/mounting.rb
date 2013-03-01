@@ -5,7 +5,7 @@ module Core
     # +read+ and +write+ methods to make them aware of mounted mappers and
     # other methods.
     #
-    # Also, +method_missing+ method is defined here that will delegate missing
+    # Also, the +method_missing+ method is defined here to delegate the missing
     # method to the very first mounted mapper that responds to it.
     module Mapper::Mounting
       extend ActiveSupport::Concern
@@ -14,12 +14,12 @@ module Core
         attr_accessor :save_order
       end
 
-      # Mounting class macros
+      # Mounting class macros.
       module ClassMethods
         # Add a mounting factory to a list of factories of a class
         # These factories are used to create actual mounted objects,
         # which are mappers themselves, associated to a particular
-        # mapper
+        # mapper.
         #
         # @param [*Object] args
         # @return [Array<Core::FlatMap::Mapper::Factory>]
@@ -34,7 +34,7 @@ module Core
       end
 
       # Extend original {Core::FlatMap::Mapping#read} method to take
-      # into account mountings of mounted mappers
+      # into account mountings of mounted mappers.
       #
       # @return [Hash] read values
       def read
@@ -46,7 +46,7 @@ module Core
       # Extend original {Core::FlatMap::Mapping#write} method to pass
       # +params+ to mounted mappers.
       #
-      # Overridden in {ModelMethods}. Left here for consistency
+      # Overridden in {ModelMethods}. Left here for consistency.
       #
       # @param [Hash] params
       # @return [Hash] params
@@ -74,17 +74,17 @@ module Core
         all_mountings.reject{ |m| m.owned? || m.save_order == :before }
       end
 
-      # Return a list of all mountings (mapper objects) associated with +self+
+      # Return a list of all mountings (mapper objects) associated with +self+.
       #
-      # Overridden in {Traits}. Left here for consistency
+      # Overridden in {Traits}. Left here for consistency.
       #
       # @return [Array<Core::FlatMap::Mapper>]
       def mountings
         @mountings ||= self.class.mountings.map{ |factory| factory.create(self) }
       end
 
-      # Return mapping with a name that corresponds to passed +mounting_name+,
-      # if it exists
+      # Return a mapping with the name that corresponds to passed +mounting_name+,
+      # if it exists.
       #
       # @return [Core::FlatMap::Mapping, nil]
       def mounting(mounting_name, deep = true)
@@ -92,7 +92,7 @@ module Core
         list.find{ |mount| mount.name == mounting_name }
       end
 
-      # Return a list of all mounted mappers, fetching deeply nested mappers
+      # Return a list of all mounted mappers, fetching deeply nested mappers.
       #
       # @return [Array<Core::FlatMap::Mapper>] mounted mappers (including traits)
       def all_mountings
@@ -100,12 +100,12 @@ module Core
       end
       private :all_mountings
 
-      # Return a list of all mappings, i.e. mappings that associated to +self+
-      # plus mappings of all deeply mounted mappers. If +self+ is owner - that
-      # meant it is a part (a trait) of a host mapper. That means that all
+      # Return a list of all mappings, i.e. mappings associated to +self+,
+      # plus mappings of all deeply mounted mappers. If +self+ is the owner,
+      # that means it is a part (a trait) of a host mapper. That means that all
       # mappings of it actually correspond to all mappings of a host mapper.
       # This allows to define things like validation in a trait where access
-      # to top-level mappings is required
+      # to top-level mappings is required.
       #
       # @return [Array<Core::FlatMap::Mapping>]
       def all_mappings

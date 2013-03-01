@@ -92,8 +92,7 @@ module Core
           return @options[:mounting_point].call(owner_target)
         end
 
-        reflection = owner_target.class.reflect_on_association(name)
-        reflection ||= owner_target.class.reflect_on_association(name.to_s.pluralize.to_sym)
+        reflection = reflection_from_target(owner_target)
         return unless reflection.present?
 
         case
@@ -106,10 +105,33 @@ module Core
         end
       end
 
+      # Try to retreive an association reflection that has a name corresponding
+      # to the one of +self+
+      #
+      # @param [ActiveRecord::Base] target
+      # @return [ActiveRecord::Reflection::AssociationReflection, nil]
+      def reflection_from_target(target)
+        return unless name.present? && target.is_a?(ActiveRecord::Base)
+        reflection = target.class.reflect_on_association(name)
+        reflection || target.class.reflect_on_association(name.to_s.pluralize.to_sym)
+      end
+
       # Simply sends a name of a mounting to the target of a host mapper, and use
       # return value as a target for a mapper being created.
       def target_from_name(target)
         target.send(name)
+      end
+
+      # Return order relative to target of the passed +mapper+ in which mapper to
+      # be created should be saved. In particular, targets of <tt>:belongs_to</tt>
+      # associations should be saved before target of +mapper+ is saved.
+      #
+      # @param [Core::FlatMap::Mapper] mapper
+      # @return [Symbol]
+      def fetch_save_order(mapper)
+        reflection = reflection_from_target(mapper.target)
+        return unless reflection.present?
+        reflection.macro == :belongs_to ? :before : :after
       end
 
       # Creates a new mapper object for mounting. If factory is traited, the new mapper
@@ -119,11 +141,13 @@ module Core
       # @param [Core::FlatMap::Mapper] mapper Host mapper
       # @param [*Symbol] owner_traits List of traits to be applied to a newly created mapper
       def create(mapper, *owner_traits)
+        save_order = @options[:save] || fetch_save_order(mapper) || :after
         new_one = mapper_class.new(fetch_target(mapper), *(traits + owner_traits).uniq, &@extension)
         if traited?
           new_one.owner = mapper
         else
           new_one.name = @identifier
+          new_one.save_order = save_order
         end
         new_one
       end

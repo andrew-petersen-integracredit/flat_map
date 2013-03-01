@@ -10,6 +10,10 @@ module Core
     module Mapper::Mounting
       extend ActiveSupport::Concern
 
+      included do
+        attr_accessor :save_order
+      end
+
       # Mounting class macros
       module ClassMethods
         # Add a mounting factory to a list of factories of a class
@@ -54,6 +58,20 @@ module Core
         end
 
         params
+      end
+
+      # Return list of mappings to be saved before saving target of +self+
+      #
+      # @return [Array<Core::FlatMap::Mapper>]
+      def before_save_mountings
+        all_mountings.select{ |m| m.owned? || m.save_order == :before }
+      end
+
+      # Return list of mappings to be saved after target of +self+ was saved
+      #
+      # @return [Array<Core::FlatMap::Mapper>]
+      def after_save_mountings
+        all_mountings.reject{ |m| m.owned? || m.save_order == :before }
       end
 
       # Return a list of all mountings (mapper objects) associated with +self+

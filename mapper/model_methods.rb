@@ -108,25 +108,51 @@ module Core
       end
 
       # Try to save the target and send a +save+ method to all mounted mappers.
-      # Return +false+ if that chain of +save+ calls returns true on any of
-      # it's elements. Return +true+ otherwise.
+      # The order in which mappings are saved is important, since we save
+      # records with :validate => false option. Since Rails will perform
+      # auto-saving on associations (and it in its turn will try to save associated
+      # record with :validate => true option. To be more precise, with
+      # :validate => !autosave option, where autosave corresponds to that option
+      # of reflection, which is usually not specified, i.e. nil), we might come to
+      # a situation of saving a record with nil foreign key for belongs_to association,
+      # which will raise exception. Thus, we want to explicitly save records in
+      # order which will allow them to be saved.
       #
       # Saving is performed as a callback.
       #
       # @return [Boolean]
       def save
         run_callbacks :save do
-          res = true
-          mountings.each do |mapper|
-            break unless res
-            res = mapper.save
-          end
-          unless owned?
-            res = res && target.respond_to?(:save) ? target.save(:validate => false) : true
-          end
-          res
+          res = save_mountings(before_save_mountings)
+          res &&= save_target
+          res &&= save_mountings(after_save_mountings)
         end
       end
+
+      # Save +target+
+      #
+      # @return [Boolean]
+      def save_target
+        return true if owned?
+        target.respond_to?(:save) ? target.save(:validate => false) : true
+      end
+
+      # Perform target save with callbacks call
+      #
+      # @return [Boolean]
+      def shallow_save
+        run_callbacks(:save){ save_target }
+      end
+
+      # Send <tt>:save</tt> method to all mountings in list. Will return +true+
+      # only if all savings are positive.
+      #
+      # @param [Array<Core::FlatMap::Mapper>]
+      # @return [Boolean]
+      def save_mountings(mountings)
+        mountings.map{ |mount| mount.shallow_save }.all?
+      end
+      private :save_mountings
 
       # Return +true+ if mapper is valid, i.e. if it is valid itself, and if
       # all mounted mappers (traits and other mappers) are valid also

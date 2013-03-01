@@ -52,7 +52,8 @@ module Core
       #   to be used on current step
       # @return [Array<Step>]
       def self.step(step_name, options = {}, &block)
-        steps.push Step.new(step_name, options, block)
+        step_name_sym = step_name.to_sym
+        steps[step_name_sym] = Step.new(step_name_sym, options, block)
       end
 
       # Specifies a preprocessing block for the last step defined.
@@ -101,16 +102,14 @@ module Core
       # @param [Symbol] name
       # @return [Core::FlatMap::FormFlow::Step]
       def self.find_step_by_name(name)
-        steps.find{ |step| step.name == name }.tap do |step|
-          raise NoStepError.new(name, self.name) unless step.present?
-        end
+        steps[name.to_sym] or raise NoStepError.new(name, self.name)
       end
 
       # Return list of steps of a class
       #
       # @return [Array<Step>]
       def self.steps
-        @steps ||= []
+        @steps ||= ActiveSupport::OrderedHash.new
       end
 
       # Sets name of the mapper to use on steps by default
@@ -229,7 +228,7 @@ module Core
       #
       # @return [Core::FlatMap::FormFlow::Step]
       def current_step
-        self.class.steps[step - 1]
+        self.class.steps.values[step - 1]
       end
 
       # Return instance of mapper to be used on current step

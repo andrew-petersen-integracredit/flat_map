@@ -127,9 +127,11 @@ module Core
       # @return [Boolean]
       def save
         run_callbacks :save do
-          res = save_mountings(before_save_mountings)
-          res &&= save_target
-          res &&= save_mountings(after_save_mountings)
+          before_res = save_mountings(before_save_mountings)
+          target_res = self_mountings.map{ |m| m.shallow_save }.all?
+          after_res  = save_mountings(after_save_mountings)
+
+          before_res && target_res && after_res
         end
       end
 
@@ -154,7 +156,7 @@ module Core
       # @param [Array<Core::FlatMap::Mapper>]
       # @return [Boolean]
       def save_mountings(mountings)
-        mountings.map{ |mount| mount.shallow_save }.all?
+        mountings.map{ |mount| mount.save }.all?
       end
       private :save_mountings
 

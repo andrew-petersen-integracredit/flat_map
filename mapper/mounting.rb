@@ -64,14 +64,30 @@ module Core
       #
       # @return [Array<Core::FlatMap::Mapper>]
       def before_save_mountings
-        all_mountings.select{ |m| m.owned? || m.save_order == :before }
+        nearest_mountings.select{ |m| m.save_order == :before }
       end
 
       # Return list of mappings to be saved after target of +self+ was saved
       #
       # @return [Array<Core::FlatMap::Mapper>]
       def after_save_mountings
-        all_mountings.reject{ |m| m.owned? || m.save_order == :before }
+        nearest_mountings.reject{ |m| m.save_order == :before }
+      end
+
+      # Return all mountings that are mouted on +self+ directly or through
+      # traits.
+      #
+      # @return [Array<Core::FlatMap::Mapper>]
+      def nearest_mountings
+        mountings.map{ |m| m.owned? ? m.nearest_mountings : m }.flatten
+      end
+
+      # Return a list of all mountings that represent full picture of +self+, i.e.
+      # +self+ and all traits, including deeply nested, that are mounted on self
+      #
+      # @return [Array<Core::FlatMap::Mapper>]
+      def self_mountings
+        mountings.select(&:owned?).map{ |m| m.self_mountings }.flatten.concat [self]
       end
 
       # Return a list of all mountings (mapper objects) associated with +self+.

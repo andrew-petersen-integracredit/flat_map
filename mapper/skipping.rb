@@ -16,9 +16,7 @@ module Core
       def skip!
         @_skip_processing = true
 
-        if target.is_a?(ActiveRecord::Base) && target.new_record?
-          target.instance_variable_set('@destroyed', true)
-        end
+        target.delete if target.is_a?(ActiveRecord::Base) && target.new_record?
       end
 
       # Remove "skip" mark from +self+ and "destroyed" flag from

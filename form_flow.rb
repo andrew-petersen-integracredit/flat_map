@@ -35,7 +35,7 @@ module Core
         end
       end
 
-      attr_reader :controller, :step_number, :mapper
+      attr_reader :controller, :step_name, :mapper
 
       delegate :params, :session, :to => :controller
       delegate :mapper_extension, :traits, :to => :current_step
@@ -52,8 +52,7 @@ module Core
       #   to be used on current step
       # @return [Array<Step>]
       def self.step(step_name, options = {}, &block)
-        step_name_sym = step_name.to_sym
-        steps[step_name_sym] = Step.new(step_name_sym, options, block)
+        steps[step_name] = Step.new(step_name, options, block)
       end
 
       # Specify a pre-processing block for the last step defined.
@@ -63,7 +62,7 @@ module Core
       def self.before(name, &block)
         return before_each(&block) if name == :each
 
-        find_step_by_name(name).before = block
+        steps[name].before = block
       end
 
       # Specify a post-processing block for the last step defined.
@@ -74,7 +73,7 @@ module Core
       def self.after(name, &block)
         return after_each(&block) if name == :each
 
-        find_step_by_name(name).after = block
+        steps[name].after = block
       end
 
       # Return a pre-processing setup to be performed before each step.
@@ -93,24 +92,6 @@ module Core
       def self.after_each(&block)
         return @after_each_setup unless block_given?
         @after_each_setup = block
-      end
-
-      # Find a particular step in +steps+ by its name. Will raise
-      # {NoStepError} on failure.
-      #
-      # @param [Symbol] name
-      # @return [Core::FlatMap::FormFlow::Step]
-      def self.find_step_by_name(name)
-        steps[name.to_sym] or raise NoStepError.new(name, self.name)
-      end
-
-      # Find particular step in +steps+ by its index. Will raise
-      # {NoStepError} on failure.
-      #
-      # @param [Integer] index
-      # @return [Core::FlatMap::FormFlow::Step]
-      def self.find_step_by_index(index)
-        steps.values[index - 1] or raise NoStepError.new(index, self.name)
       end
 
       # Return the list of steps for a class.
@@ -144,38 +125,28 @@ module Core
 
       # Shortcut to return desired step by its name or index.
       #
-      # @param [Integer, Symbol] index_or_name
+      # @param [String, Symbol] step_name
       # @return [Core::FlatMap::FormFlow::Step, nil]
-      def self.[](index_or_name)
-        case index_or_name
-        when Symbol, String
-          find_step_by_name(index_or_name)
-        when Fixnum, Integer
-          find_step_by_index(index_or_name)
-        else
-          nil
-        end
+      def self.[](step_name)
+        steps[step_name]
       end
 
-      # Initialize a step with a +controller+ and perform additional processing
-      # based on it:
-      # * Get the current step from params, or default it to 1
-      # * Set controller's '@flow' instance variable to +self+
-      # * Perform optional initial_setup (for the first step)
-      # * Prepare data for current step via special controller method
+      # Initialize a step with a +controller+ and a set of options
       #
       # @param [ActionController::Base] controller
+      # @param [Hash] options
       def initialize(controller, options = {})
         @controller, @options = controller, options
-        @step_number = params[:step].try(:to_i) || 1
+        @step_name = options[:step_name].try(:to_sym)
       end
 
-      # Writer for the <tt>@step</tt> variable.
+      # Writer for the <tt>@step_name</tt> variable.
       #
-      # @param [#to_i] step_number
-      # @return [Integer] step number
-      def goto_step_number(step_number)
-        @step_number = step_number.to_i
+      # @param [#to_sym] step_name
+      # @return [String, Symbol]
+      def goto(step_name)
+        @mapper = nil
+        @step_name = step_name.to_sym
       end
 
       # Return +true+ if the flow uses {PasswordTokenizer tokenizer} features
@@ -213,8 +184,6 @@ module Core
         before_step_setup
         if mapper.apply(params[mapper_params_key])
           after_step_setup
-          increment_step!
-          @mapper = nil unless finished?
           true
         else
           tokenizer.tokenize_attributes!(mapper) if first_step? && use_tokenizer?
@@ -244,14 +213,15 @@ module Core
       #
       # @return [Core::FlatMap::FormFlow::Step]
       def current_step
-        self.class.find_step_by_index(step_number)
+        self.class[step_name]
       end
 
-      # Return the step name of the current step.
+      # Return +true+ if there was a step definition for a passed +step_name+
       #
-      # @return [String]
-      def step_name
-        current_step.try(:name)
+      # @param [#to_sym] step_name
+      # @return [Boolean]
+      def step_defined?(step_name)
+        self.class.steps.key?(step_name.to_sym)
       end
 
       # Return an instance of mapper to be used on current step.
@@ -269,6 +239,14 @@ module Core
       # @return [Core::FlatMap::Mapper]
       def fetch_mapper
         first_step? ? build_mapper : find_mapper
+      end
+
+      # Return +true+ if +step_name+ corresponds to name of the first step
+      # defined by flow.
+      #
+      # @return [Boolean]
+      def first_step?
+        self.class.steps.keys[0] == step_name
       end
 
       # Create a mapper for a new record.
@@ -317,34 +295,6 @@ module Core
       # @return [Symbol]
       def mapper_session_key
         :"#{current_mapper_name}_id"
-      end
-
-      # Return the total number of steps defined in class.
-      #
-      # @return [Integer]
-      def total_steps
-        self.class.total_steps
-      end
-
-      # Return +true+ if the last step has been processed.
-      #
-      # @return [Boolean]
-      def finished?
-        step_number > total_steps
-      end
-
-      # Return +true+ if currently processing the very first step.
-      #
-      # @return [Boolean]
-      def first_step?
-        step_number == 1
-      end
-
-      # Increment <tt>@step</tt> by one.
-      #
-      # @return [Integer]
-      def increment_step!
-        @step_number += 1
       end
 
       # Return the view name to render for the flow.

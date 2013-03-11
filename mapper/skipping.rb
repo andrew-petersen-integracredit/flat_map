@@ -6,16 +6,33 @@ module Core
       # Mark self as skipped, i.e. it will not be subject of
       # validation and saving chain.
       #
-      # @return [true]
+      # Note that this will also mark the target record as
+      # destroyed if it is a new record. Thus, this
+      # record will not be a subject of Rails associated
+      # validation procedures, and will not be saved as an
+      # associated record.
+      #
+      # @return [Object]
       def skip!
         @_skip_processing = true
+
+        # Using the instance variable directly as {ActiveRecord::Base#delete}
+        # will freeze the record.
+        if target.is_a?(ActiveRecord::Base)
+          target.instance_variable_set('@destroyed', true) if target.new_record?
+        end
       end
 
-      # Remove "skip" mark from +self+.
+      # Remove "skip" mark from +self+ and "destroyed" flag from
+      # the target.
       #
-      # @return [nil]
+      # @return [Object]
       def use!
         @_skip_processing = nil
+
+        if target.is_a?(ActiveRecord::Base)
+          target.instance_variable_set('@destroyed', false) 
+        end
       end
 
       # Return +true+ if +self+ was marked for skipping.
@@ -35,20 +52,10 @@ module Core
 
       # Override {Core::FlatMap::Mapper::ModelMethods#save} method to
       # force it to return +true+ if +self+ is marked for skipping.
-      # Note that this will also mark the target record for
-      # destruction if it is a new record. Thus, this
-      # record will not be a subject of Rails associated
-      # validation procedures, and will not be saved as an
-      # associated record.
       #
       # @return [Boolean]
       def save
-        if skipped?
-          target.destroy if target.respond_to?(:new_record?) && target.new_record?
-          true
-        else
-          super
-        end
+        skipped? || super
       end
 
       # Mark self as used and then delegated to original

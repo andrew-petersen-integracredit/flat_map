@@ -153,7 +153,7 @@ module Core
       # Send <tt>:save</tt> method to all mountings in list. Will return +true+
       # only if all savings are positive.
       #
-      # @param [Array<Core::FlatMap::Mapper>]
+      # @param [Array<Core::FlatMap::Mapper>] mountings
       # @return [Boolean]
       def save_mountings(mountings)
         mountings.map{ |mount| mount.save }.all?

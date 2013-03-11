@@ -108,6 +108,23 @@ module Core
     #   CustomerAccountMapper.find(1, :with_email_phone_residence).read # => :brand, :source, :email_address, phone numbers,
     #                                    #:residence attributes - all will be available for reading and writing in plain hash
     #
+    # === Extensions
+    #
+    # When mounting a mapper, one can pass an optional block. This block is used as an extension for a mounted
+    # mapper and acts as an anonymous trait. For example:
+    #
+    #   class CustomerAccountMapper < Core::FlatMap::Mapper
+    #     mount :customer do
+    #       map :dob => :date_of_birth, :format => :i18n_l
+    #       validates_presence_of :dob
+    #       
+    #       mount :unique_identifier
+    #       mount :drivers_license, :traits => :person_name_with_callback
+    #       
+    #       validates_acceptance_of :esign_consent, :message => "You must check this box to continue"
+    #     end
+    #   end
+    #
     # === Validation
     #
     # <tt>Core::FlatMap::Mapper</tt> includes <tt>ActiveModel::Validations</tt> module, allowing each model to

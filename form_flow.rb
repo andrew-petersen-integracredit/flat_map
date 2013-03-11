@@ -1,15 +1,96 @@
 module Core
   module FlatMap
-    # TODO: Write a new RDoc for flows
+    # == FormFlow
+    #
+    # FormFlow classes are used as integration piece between mappers and controllers.
+    # Idea behind them is to define set of named steps, each of which describes
+    # traits and other options for a specific form. However, ability to define
+    # callbacks to be executed before and after each step provides more functionality
+    # than simple mapper-controller integration.
+    #
+    # === Initialization
+    #
+    # FormFlow objects are initialized with a controller and a set of options:
+    #
+    # [<tt>:step_name</tt>]     Specify a step name to by used by flow in current action.
+    # [<tt>:use_tokenizer</tt>] Allows to specify whether or not use PasswordTokenizer
+    #                           feature for processing first step of the form. This
+    #                           is used more like helper to move repeated code out
+    #                           of controller.
+    #
+    # === Mapper
+    #
+    # Each flow should define mapper it will work with via +mount+ method. However,
+    # each particular step defined may overload this setting via <tt>:mapper</tt>
+    # option. The block used at step definition will act as a mapper extension.
+    # Thus, additional mappings, mountings or callbacks may be defined there.
+    #
+    # === Steps
+    #
+    # Each step within a flow is a named set of options, used to build a mapper
+    # for subsequent params processing or building a form in a view. A step is
+    # defined by a name, a set of options and an optional block.
+    #
+    # [<tt>:mapper</tt>] Allows to overload mapper class used by a flow on current
+    #                    step.
+    # [<tt>:traits</tt>] Allows to specify a list of traits to be applied to a
+    #                    mapper on current step.
+    #
+    # The block, if present, is used as an extension for the mapper used on the
+    # current step.
+    #
+    # === Callbacks
+    #
+    # To provide additional pre- and post-step processing, one may define callbacks
+    # for each step. Since steps are named, each callback is defined via +before+
+    # or +after+ method, and a block of code with arity of 2. Controller and a
+    # flow itself are passed to this block on call.
+    #
+    # Additionally, <tt>:each</tt> may be used instead of step name to define a
+    # callback to be executed for each step.
+    #
+    # === Example
+    #
+    #   class Registration::FourStepFlow < Core::FlatMap::FormFlow
+    #     mount :customer_account
+    #     
+    #     step :first, :traits => :password_validation do
+    #       validates_with TexasDisclosuresValidator, :source => :application_state
+    #       
+    #       mount :email_address
+    #       mount :application
+    #       mount :customer, :traits => :phone_numbers
+    #     end
+    #     
+    #     before :first do |controller, flow|
+    #       flow.mapper.write :brand => Customer.current_brand
+    #     end
+    #     
+    #     after :first do |controller, flow|
+    #       controller.session[:customer_account_id] = flow.target.id
+    #       controller.session[:customer_id]         = flow.target.customer.id
+    #       controller.log_in_current_customer_account(flow.target.id)
+    #     end
+    #     
+    #     step :second do
+    #       mount :customer, :traits => :vehicle_selection
+    #       
+    #       set_callback :save, :after, :assign_application_title
+    #       
+    #       # Associate the title we just created to this application
+    #       def assign_application_title
+    #         application = target.applications.latest
+    #         assign_title(application)
+    #       end
+    #     end
+    #     
+    #     # more definitions
+    #     
+    #     after :each do |controller, flow|
+    #       flow.mapper.target.increment_registration_step!(registration_flow_class, flow.step_number)
+    #     end
+    #   end
     class FormFlow
-      # Raised when step modifiers are called with no steps defined.
-      class NoStepError < RuntimeError
-        # Initialize error with a message
-        def initialize(name, class_name)
-          super "Unable to find :#{name} step in #{class_name}"
-        end
-      end
-
       # Raised when no default mapper was mounted on the flow and the
       # step doesn't specify a mapper to work with.
       class NoMapperError < RuntimeError
@@ -45,7 +126,8 @@ module Core
       # to use for the step and the list of traits for it. An optional
       # block acts as an extension for the mapper object.
       #
-      # @param [Hash] options
+      # @param [Symbol] step_name
+      # @param [Hash]   options
       # @option [Symbol]                :mapper name of the mapper to use
       #                                         during step processing
       # @option [Symbol, Array<Symbol>] :traits traits of the mapper

@@ -108,13 +108,24 @@ module Core
         list.find{ |mount| mount.name == mounting_name }
       end
 
-      # Return a list of all mounted mappers, fetching deeply nested mappers.
+      # Return a list of all mounted mappers. If +self+ is a trait, return a
+      # list of all mountings of the owner. This will allow separate traits
+      # to share methods via method_missing pattern.
       #
       # @return [Array<Core::FlatMap::Mapper>] mounted mappers (including traits)
       def all_mountings
-        mountings.dup.concat(mountings.map(&:all_mountings)).flatten
+        return all_nested_mountings unless owned?
+        owner.all_mountings
       end
-      private :all_mountings
+      protected :all_mountings
+
+      # Return a list of mountings that are accessible by a named mapper.
+      #
+      # @return [Array<Core::FlatMap::Mapper>]
+      def all_nested_mountings
+        mountings.dup.concat(mountings.map(&:all_nested_mountings)).flatten
+      end
+      protected :all_nested_mountings
 
       # Return a list of all mappings, i.e. mappings associated to +self+,
       # plus mappings of all deeply mounted mappers. If +self+ is the owner,

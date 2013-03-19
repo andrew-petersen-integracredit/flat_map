@@ -28,8 +28,15 @@ module Core
         end
 
         # List of mountings (factories) of a class.
+        #
+        # @return [Array<Core::FlatMap::Mapper>]
         def mountings
           @mountings ||= []
+        end
+
+        # Writer for @mountings
+        def mountings=(val)
+          @mountings = val
         end
       end
 

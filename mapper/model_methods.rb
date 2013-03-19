@@ -12,6 +12,14 @@ module Core
 
       included do
         define_callbacks :save
+
+        # Writer of the target class name. Allows manual control over target
+        # class of the mapper, for example:
+        #
+        #   class CustomerMapper
+        #     self.target_class_name = 'Customer::Active'
+        #   end
+        class_attribute :target_class_name
       end
 
       # ModelMethods class macros
@@ -40,28 +48,26 @@ module Core
         #
         # @return [Class] class
         def target_class
-          target_class_name.constantize
+          (target_class_name || default_target_class_name).constantize
         end
 
-        # Writer of the target class name. Allows manual control over target
-        # class of the mapper, for example:
+        # Return target class name based on name of the ancestor mapper
+        # that is closest to {Core::FlatMap::Mapper}, which may be +self+
         #
-        #   class CustomerMapper
-        #     self.target_class_name = 'Customer::Active'
+        #   class VehicleMapper
+        #     # some definitions
         #   end
         #
-        # @param [String] class_name
-        # @return [String] class_name
-        def target_class_name=(class_name)
-          @target_class_name = class_name
-        end
-
-        # Return the name of the target class. Fetch it by the class name of
-        # +self+ if it is undefined.
+        #   class CarMapper < VehicleMapper
+        #     # some more definitions
+        #   end
         #
-        # @return [String] class_name
-        def target_class_name
-          @target_class_name ||= self.name[/^(\w+)Mapper.*$/, 1]
+        #   CarMapper.target_class # => Vehicle
+        #
+        # @return [String]
+        def default_target_class_name
+          core_mapper_index = ancestors.index(::Core::FlatMap::Mapper)
+          ancestors[core_mapper_index - 1].name[/^(\w+)Mapper.*$/, 1]
         end
       end
 

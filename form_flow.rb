@@ -116,6 +116,8 @@ module Core
         end
       end
 
+      class_attribute :mapper_name, :before_each, :after_each
+
       attr_reader :controller, :step_name, :mapper
 
       delegate :params, :session, :to => :controller
@@ -142,7 +144,7 @@ module Core
       #
       # @return [Proc]
       def self.before(name, &block)
-        return before_each(&block) if name == :each
+        return self.before_each = block if name == :each
 
         steps[name].before = block
       end
@@ -153,27 +155,9 @@ module Core
       #
       # @return [Proc]
       def self.after(name, &block)
-        return after_each(&block) if name == :each
+        return self.after_each = block if name == :each
 
         steps[name].after = block
-      end
-
-      # Return a pre-processing setup to be performed before each step.
-      # If the block is passed, it will be assigned as such setup.
-      #
-      # @return [Proc, nil]
-      def self.before_each(&block)
-        return @before_each_setup unless block_given?
-        @before_each_setup = block
-      end
-
-      # Return a post-processing setup to be performed after each step.
-      # If a block is passed, it will be assigned as such setup.
-      #
-      # @return [Proc, nil]
-      def self.after_each(&block)
-        return @after_each_setup unless block_given?
-        @after_each_setup = block
       end
 
       # Return the list of steps for a class.
@@ -195,14 +179,7 @@ module Core
       # @param [Symbol] mapper_name
       # @return [Symbol]
       def self.mount(mapper_name)
-        @mapper_name = mapper_name
-      end
-
-      # Return a mapper name specified by the #mount method.
-      #
-      # @return [Symbol, nil]
-      def self.mapper_name
-        @mapper_name
+        self.mapper_name = mapper_name
       end
 
       # Shortcut to return desired step by its name or index.
@@ -277,7 +254,7 @@ module Core
       #
       # @return [Object]
       def before_step_setup
-        self.class.before_each.try(:call, controller, self)
+        before_each.try(:call, controller, self)
         current_step.before.try(:call, controller, self)
         tokenizer.prepare_params!(params[mapper_params_key]) if first_step? && use_tokenizer?
       end
@@ -286,7 +263,7 @@ module Core
       #
       # @return [Object]
       def after_step_setup
-        self.class.after_each.try(:call, controller, self)
+        after_each.try(:call, controller, self)
         current_step.after.try(:call, controller, self)
         tokenizer.clear! if first_step? && use_tokenizer?
       end

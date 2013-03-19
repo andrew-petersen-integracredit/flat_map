@@ -56,6 +56,11 @@ module Core
         def mappings
           @mappings ||= []
         end
+
+        # Writer for mappings
+        def mappings=(val)
+          @mappings = val
+        end
       end
 
       # Send passed +params+ +write_from_params+ method of each

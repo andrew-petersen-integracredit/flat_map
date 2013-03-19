@@ -213,6 +213,19 @@ module Core
       attr_reader :target, :traits
       attr_accessor :owner, :name
 
+      # Callback to dup mappings and mountings on inheritance.
+      # The values are cloned from actual mappers (i.e. something
+      # like CustomerAccountMapper, since it is useless to clone
+      # empty values of Core::FlatMap::Mapper).
+      #
+      # Note: those class attributes are defined in {Mapping}
+      # and {Mounting} modules.
+      def self.inherited(subclass)
+        return unless self < Core::FlatMap::Mapper
+        subclass.mappings  = mappings.dup
+        subclass.mountings = mountings.dup
+      end
+
       # Initializes +mapper+ with +target+ and +traits+, which are
       # used to fetch proper list of mounted mappers. Raises error
       # if target is not specified.

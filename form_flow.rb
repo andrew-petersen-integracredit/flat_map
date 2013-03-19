@@ -124,6 +124,12 @@ module Core
       delegate :mapper_extension, :traits, :to => :current_step
       delegate :target, :to => :mapper
 
+      # Callback to clone steps for inherited FormFlow.
+      def self.inherited(subclass)
+        return unless self < Core::FlatMap::FormFlow
+        subclass.steps = steps.dup
+      end
+
       # Define a new step by explicitly specifying the name of the mapper
       # to use for the step and the list of traits for it. An optional
       # block acts as an extension for the mapper object.
@@ -165,6 +171,13 @@ module Core
       # @return [ActiveSupport::OrderedHash]
       def self.steps
         @steps ||= ActiveSupport::OrderedHash.new
+      end
+
+      # Writer for @steps
+      #
+      # @return [ActiveSupport::OrderedHash]
+      def self.steps=(value)
+        @steps = value
       end
 
       # Return total number of steps.

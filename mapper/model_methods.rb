@@ -66,8 +66,9 @@ module Core
         #
         # @return [String]
         def default_target_class_name
-          core_mapper_index = ancestors.index(::Core::FlatMap::Mapper)
-          ancestors[core_mapper_index - 1].name[/^(\w+)Mapper.*$/, 1]
+          ancestor_classes = ancestors.select{ |a| a.is_a? Class }
+          core_mapper_index = ancestor_classes.index(::Core::FlatMap::Mapper)
+          ancestor_classes[core_mapper_index - 1].name[/^(\w+)Mapper.*$/, 1]
         end
       end
 

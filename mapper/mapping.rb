@@ -57,7 +57,7 @@ module Core
           @mappings ||= []
         end
 
-        # Writer for mappings
+        # Writer for mappings.
         def mappings=(val)
           @mappings = val
         end

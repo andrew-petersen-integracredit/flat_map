@@ -34,7 +34,7 @@ module Core
           @mountings ||= []
         end
 
-        # Writer for @mountings
+        # Writer for @mountings.
         def mountings=(val)
           @mountings = val
         end

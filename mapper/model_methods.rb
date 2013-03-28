@@ -52,7 +52,7 @@ module Core
         end
 
         # Return target class name based on name of the ancestor mapper
-        # that is closest to {Core::FlatMap::Mapper}, which may be +self+
+        # that is closest to {Core::FlatMap::Mapper}, which may be +self+.
         #
         #   class VehicleMapper
         #     # some definitions

@@ -121,7 +121,7 @@ module Core
       #
       # @return [Array<Core::FlatMap::Mapper>] mounted mappers (including traits)
       def all_mountings
-        return all_nested_mountings unless owned?
+        return all_nested_mountings.unshift(self) unless owned?
         owner.all_mountings
       end
       protected :all_mountings

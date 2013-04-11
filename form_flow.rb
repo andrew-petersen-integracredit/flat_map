@@ -203,6 +203,17 @@ module Core
         steps[step_name]
       end
 
+      # Rename one or more steps. Takes a hash of form {old_name => new_name}
+      #
+      # @param [Hash] hash
+      # @return [Hash]
+      def self.rename_step(hash)
+        hash.each do |old_name, new_name|
+          steps[new_name] = steps.delete(old_name)
+        end
+      end
+      private_class_method :rename_step
+
       # Initialize a step with a +controller+ and a set of options
       #
       # @param [ActionController::Base] controller

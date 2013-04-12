@@ -127,7 +127,7 @@ module Core
       # Callback to clone steps for inherited FormFlow.
       def self.inherited(subclass)
         return unless self < Core::FlatMap::FormFlow
-        subclass.steps = steps.dup
+        subclass.steps = Hash[*steps.map{ |name, step| [name, step.clone] }.flatten]
       end
 
       # Define a new step by explicitly specifying the name of the mapper

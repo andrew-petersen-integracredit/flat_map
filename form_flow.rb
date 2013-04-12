@@ -203,7 +203,7 @@ module Core
         steps[step_name]
       end
 
-      # Rename one or more steps. Takes a hash of form {old_name => new_name}
+      # Rename one or more steps. Takes a hash of form {old_name => new_name}.
       #
       # @param [Hash] hash
       # @return [Hash]
@@ -228,7 +228,7 @@ module Core
       # @param [#to_sym] step_name
       # @return [String, Symbol]
       def goto(step_name)
-        @mapper = nil
+        @mapper    = nil
         @step_name = step_name.to_sym
       end
 

@@ -5,11 +5,19 @@ module Core
     #
     # This methods are defined within anonymous module that will extend
     # mapper on first usage of this methods.
+    #
+    # NOTE: :to_ary method is called internally by Ruby 1.9.3 when we call
+    # something like [mapper].flatten. And we DO want default behavior
+    # for handling this missing method.
     module Mapper::AttributeMethods
       # Lazily define reader and writer methods for all mappings available
       # to the mapper, and extend +self+ with it.
       def method_missing(name, *args, &block)
-        return super if @attribute_methods_defined
+        if name == :to_ary ||
+            @attribute_methods_defined ||
+            Core::FlatMap::Mapper.protected_instance_methods.include?(name)
+          return super
+        end
 
         mappings    = all_mappings
         valid_names = mappings.map{ |m| [m.name, "#{m.name}=".to_sym] }.flatten

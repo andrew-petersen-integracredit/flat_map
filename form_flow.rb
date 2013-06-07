@@ -146,7 +146,7 @@ module Core
       # @return [Step]
       def self.step(step_name, options = {}, &block)
         before, after = infer_step_setup(steps[step_name], options.delete(:inherit_setup))
-        step = Step.new(step_name, options, block)
+        step        = Step.new(step_name, options, block)
         step.before = before if before.present?
         step.after  = after if after.present?
         steps[step_name] = step

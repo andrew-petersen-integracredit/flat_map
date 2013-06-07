@@ -137,13 +137,37 @@ module Core
       # @param [Symbol] step_name
       # @param [Hash]   options
       # @option [Symbol]                :mapper name of the mapper to use
-      #                                         during step processing
+      #   during step processing
       # @option [Symbol, Array<Symbol>] :traits traits of the mapper
       #   to be used on current step
-      # @return [Array<Step>]
+      # @option [Symbol]                :inherit_setup specify which
+      #   step setup to inherit from parent flow. Available values are
+      #   :before, :after and :all
+      # @return [Step]
       def self.step(step_name, options = {}, &block)
-        steps[step_name] = Step.new(step_name, options, block)
+        before, after = infer_step_setup(steps[step_name], options.delete(:inherit_setup))
+        step = Step.new(step_name, options, block)
+        step.before = before if before.present?
+        step.after  = after if after.present?
+        steps[step_name] = step
       end
+
+      # Extract +before+ and +after+ setup blocks from existing step.
+      #
+      # @param [Step]   step
+      # @param [Symbol] kind specifies which blocks to extract
+      # @return [Array<Proc, nil>]
+      def self.infer_step_setup(step, kind)
+        return unless step.present?
+
+        case kind
+        when :before; [step.before, nil]
+        when :after;  [nil, step.after]
+        when :all;    [step.before, step.after]
+        else;         [nil, nil]
+        end
+      end
+      private_class_method :infer_step_setup
 
       # Specify a pre-processing block for the last step defined.
       # This block will be called with a controller and flow as arguments.

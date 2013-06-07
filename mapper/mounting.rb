@@ -130,7 +130,7 @@ module Core
       #
       # @return [Array<Core::FlatMap::Mapper>]
       def all_nested_mountings
-        mountings.dup.concat(mountings.map(&:all_nested_mountings)).flatten
+        mountings.dup.concat(mountings.map{ |m| m.send(:all_nested_mountings) }).flatten
       end
       protected :all_nested_mountings
 
@@ -153,12 +153,19 @@ module Core
       #
       # @return [Array<Core::FlatMap::Mapping>]
       def all_nested_mappings
-        (mappings + mountings.map(&:all_nested_mappings)).flatten
+        (mappings + mountings.map{ |m| m.send(:all_nested_mappings) }).flatten
       end
       protected :all_nested_mappings
 
-      # Delegate missing method to any mounted mapping that respond to it.
+      # Delegate missing method to any mounted mapping that respond to it,
+      # unless those methods are protected methods of Core::FlatMap::Mapper.
+      #
+      # NOTE: :to_ary method is called internally by Ruby 1.9.3 when we call
+      # something like [mapper].flatten. And we DO want default behavior
+      # for handling this missing method.
       def method_missing(name, *args, &block)
+        return super if name == :to_ary || Core::FlatMap::Mapper.protected_instance_methods.include?(name)
+
         mounting = all_mountings.find{ |m| m.respond_to?(name) }
         return super if mounting.nil?
         mounting.send(name, *args, &block)

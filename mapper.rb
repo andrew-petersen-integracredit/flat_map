@@ -211,7 +211,7 @@ module Core
       include Skipping
 
       attr_reader :target, :traits
-      attr_accessor :owner, :name
+      attr_accessor :host, :owner, :name
 
       # Callback to dup mappings and mountings on inheritance.
       # The values are cloned from actual mappers (i.e. something
@@ -258,6 +258,22 @@ module Core
       # @return [Boolean]
       def owned?
         owner.present?
+      end
+
+      # If mapper was mounted by another mapper, host is the one who
+      # mounted +self+.
+      #
+      # @return [Core::FlatMap::Mapper]
+      def host
+        owned? ? owner.host : @host
+      end
+
+      # Return +true+ if mapper is hosted, i.e. it is mounted by another
+      # mapper.
+      #
+      # @return [Boolean]
+      def hosted?
+        host.present?
       end
 
       # This is not a persisted model.

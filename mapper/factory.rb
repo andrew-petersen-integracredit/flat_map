@@ -149,6 +149,7 @@ module Core
         if traited?
           new_one.owner = mapper
         else
+          new_one.host = mapper
           new_one.name = @identifier
           new_one.save_order = save_order
         end

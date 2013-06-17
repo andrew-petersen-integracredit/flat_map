@@ -16,10 +16,16 @@ module Core
       def skip!
         @_skip_processing = true
 
-        # Using the instance variable directly as {ActiveRecord::Base#delete}
-        # will freeze the record.
         if target.is_a?(ActiveRecord::Base)
-          target.instance_variable_set('@destroyed', true) if target.new_record?
+          if target.new_record?
+            # Using the instance variable directly as {ActiveRecord::Base#delete}
+            # will freeze the record.
+            target.instance_variable_set('@destroyed', true)
+          else
+            # Using reload instead of reset_changes! to reset associated nested
+            # model changes also
+            target.reload
+          end
         end
       end
 

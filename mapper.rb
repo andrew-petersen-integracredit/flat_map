@@ -210,8 +210,9 @@ module Core
       include ModelMethods
       include Skipping
 
+      attr_writer :host
       attr_reader :target, :traits
-      attr_accessor :host, :owner, :name
+      attr_accessor :owner, :name
 
       # Callback to dup mappings and mountings on inheritance.
       # The values are cloned from actual mappers (i.e. something

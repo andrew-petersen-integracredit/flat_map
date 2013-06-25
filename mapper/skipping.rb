@@ -3,30 +3,16 @@ module Core
     # This helper module provides helper functionality that allow to
     # exclude specific mapper from a processing chain.
     module Mapper::Skipping
+      extend ActiveSupport::Autoload
+
+      autoload :ActiveRecord
+
       # Mark self as skipped, i.e. it will not be subject of
       # validation and saving chain.
-      #
-      # Note that this will also mark the target record as
-      # destroyed if it is a new record. Thus, this
-      # record will not be a subject of Rails associated
-      # validation procedures, and will not be saved as an
-      # associated record.
       #
       # @return [Object]
       def skip!
         @_skip_processing = true
-
-        if target.is_a?(ActiveRecord::Base)
-          if target.new_record?
-            # Using the instance variable directly as {ActiveRecord::Base#delete}
-            # will freeze the record.
-            target.instance_variable_set('@destroyed', true)
-          else
-            # Using reload instead of reset_changes! to reset associated nested
-            # model changes also
-            target.reload
-          end
-        end
       end
 
       # Remove "skip" mark from +self+ and "destroyed" flag from
@@ -35,10 +21,6 @@ module Core
       # @return [Object]
       def use!
         @_skip_processing = nil
-
-        if target.is_a?(ActiveRecord::Base)
-          target.instance_variable_set('@destroyed', false) 
-        end
       end
 
       # Return +true+ if +self+ was marked for skipping.

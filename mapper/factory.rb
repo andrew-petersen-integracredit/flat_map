@@ -148,7 +148,6 @@ module Core
         new_one = mapper_class.new(fetch_target(mapper), *(traits + owner_traits).uniq, &@extension)
         if traited?
           new_one.owner = mapper
-          new_one.host = mapper.host
         else
           new_one.host = mapper
           new_one.name = @identifier

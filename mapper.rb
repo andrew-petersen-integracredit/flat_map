@@ -209,6 +209,7 @@ module Core
       include ActiveModel::Validations
       include ModelMethods
       include Skipping
+      include Skipping::ActiveRecord
 
       attr_writer :host
       attr_reader :target, :traits

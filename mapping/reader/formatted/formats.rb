@@ -9,10 +9,16 @@ module Core
           Core::I18n::l(value) if value
         end
 
-        # Return the +name+ attribute of a +value+ which
-        # is supposed to be an +enum+ record.
-        def enum(value)
-          value.name if value
+        # Return the specified +property+ of a +value+ which
+        # is supposed to be an +enum+ record. By default,
+        # uses <tt>:name</tt>. However, <tt>:description</tt>
+        # might be also useful for UI purposes
+        #
+        # @param [Object] value
+        # @param [Symbol] property
+        # @return [Object]
+        def enum(value, property = :name)
+          value.send(property) if value
         end
       end
     end

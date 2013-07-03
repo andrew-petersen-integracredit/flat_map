@@ -37,7 +37,7 @@ module Core
       def attribute_methods(mappings)
         Module.new do
           mappings.each do |mapping|
-            define_method(mapping.name){ mapping.read }
+            define_method(mapping.name){ |*args| mapping.read(*args) }
 
             define_method("#{mapping.name}=") do |value|
               mapping.write(value)

@@ -22,18 +22,23 @@ module Core
         # Read the value just like the {Basic} reader does, but
         # additionally send the returned value to its format method.
         #
+        # Additional arguments will be passed to formatting function
+        # of the mapping's format.
+        #
         # @return [Object] formatted value
-        def read
-          format_value super
+        def read(*args)
+          format_value(super, *args)
         end
 
         # Send the +value+ to the format method, defined in the {Format}
         # module and specified upon reader initialization.
         #
+        # Additional optional arguments are passed as well.
+        #
         # @param [Object] value
         # @return [Object] formatted value
-        def format_value(value)
-          send(@format, value)
+        def format_value(value, *args)
+          send(@format, value, *args)
         end
         private :format_value
       end

@@ -277,13 +277,6 @@ module Core
       def hosted?
         host.present?
       end
-
-      # This is not a persisted model.
-      #
-      # @return [FalseClass]
-      def persisted?
-        false
-      end
     end
   end
 end

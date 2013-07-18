@@ -42,6 +42,17 @@ module Core
         end
       end
 
+      # Try to find trait mapper with name that corresponds to +trait_name+
+      # Used internally to manipulate such mappers (for example, skip some traits)
+      # in some scenarios.
+      #
+      # @param [Symbol] trait_name
+      # @return [Core::FlatMap::Mapperr, nil]
+      def trait(trait_name)
+        self_mountings.find{ |mount| mount.class.name.underscore =~ /#{trait_name}_trait$/ }
+      end
+      private :trait
+
       # Return only mountings that are actually traits for host mapper.
       #
       # @return [Array<Core::FlatMap::Mapper>]

@@ -157,6 +157,13 @@ module Core
         run_callbacks(:save){ save_target }
       end
 
+      # Delegate persistance to target
+      #
+      # @return [Boolean]
+      def persisted?
+        target.respond_to?(:persisted?) ? target.persisted? : false
+      end
+
       # Send <tt>:save</tt> method to all mountings in list. Will return +true+
       # only if all savings are positive.
       #

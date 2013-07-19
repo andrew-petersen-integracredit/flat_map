@@ -133,13 +133,11 @@ module Core
       #
       # @return [Boolean]
       def save
-        run_callbacks :save do
-          before_res = save_mountings(before_save_mountings)
-          target_res = self_mountings.map{ |m| m.shallow_save }.all?
-          after_res  = save_mountings(after_save_mountings)
+        before_res = save_mountings(before_save_mountings)
+        target_res = self_mountings.map{ |m| m.shallow_save }.all?
+        after_res  = save_mountings(after_save_mountings)
 
-          before_res && target_res && after_res
-        end
+        before_res && target_res && after_res
       end
 
       # Save +target+

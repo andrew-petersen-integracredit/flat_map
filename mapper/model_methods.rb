@@ -164,6 +164,13 @@ module Core
         target.respond_to?(:persisted?) ? target.persisted? : false
       end
 
+      # Delegate #id to target, if possible
+      #
+      # @return [Fixnum, nil]
+      def id
+        target.id if target.respond_to?(:id)
+      end
+
       # Send <tt>:save</tt> method to all mountings in list. Will return +true+
       # only if all savings are positive.
       #

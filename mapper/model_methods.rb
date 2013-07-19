@@ -133,13 +133,11 @@ module Core
       #
       # @return [Boolean]
       def save
-        run_callbacks :save do
-          before_res = save_mountings(before_save_mountings)
-          target_res = self_mountings.map{ |m| m.shallow_save }.all?
-          after_res  = save_mountings(after_save_mountings)
+        before_res = save_mountings(before_save_mountings)
+        target_res = self_mountings.map{ |m| m.shallow_save }.all?
+        after_res  = save_mountings(after_save_mountings)
 
-          before_res && target_res && after_res
-        end
+        before_res && target_res && after_res
       end
 
       # Save +target+
@@ -155,6 +153,20 @@ module Core
       # @return [Boolean]
       def shallow_save
         run_callbacks(:save){ save_target }
+      end
+
+      # Delegate persistance to target.
+      #
+      # @return [Boolean]
+      def persisted?
+        target.respond_to?(:persisted?) ? target.persisted? : false
+      end
+
+      # Delegate #id to target, if possible.
+      #
+      # @return [Fixnum, nil]
+      def id
+        target.id if target.respond_to?(:id)
       end
 
       # Send <tt>:save</tt> method to all mountings in list. Will return +true+

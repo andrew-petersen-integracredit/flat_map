@@ -46,6 +46,14 @@ module Core
         skipped? || super
       end
 
+      # Override {Core::FlatMap::Mapper::ModelMethods#shallow_save} method
+      # to make it possible to skip traits.
+      #
+      # @return [Boolean]
+      def shallow_save
+        skipped? || super
+      end
+
       # Mark self as used and then delegated to original
       # {Core::FlatMap::Mapper::ModelMethods#write}.
       def write(*)

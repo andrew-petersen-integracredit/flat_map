@@ -155,14 +155,14 @@ module Core
         run_callbacks(:save){ save_target }
       end
 
-      # Delegate persistance to target
+      # Delegate persistance to target.
       #
       # @return [Boolean]
       def persisted?
         target.respond_to?(:persisted?) ? target.persisted? : false
       end
 
-      # Delegate #id to target, if possible
+      # Delegate #id to target, if possible.
       #
       # @return [Fixnum, nil]
       def id

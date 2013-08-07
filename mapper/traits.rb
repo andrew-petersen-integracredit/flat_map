@@ -42,6 +42,14 @@ module Core
         end
       end
 
+      # Return a list of all mountings that represent full picture of +self+, i.e.
+      # +self+ and all traits, including deeply nested, that are mounted on self
+      #
+      # @return [Array<Core::FlatMap::Mapper>]
+      def self_mountings
+        mountings.select(&:owned?).map{ |m| m.self_mountings }.flatten.concat [self]
+      end
+
       # Try to find trait mapper with name that corresponds to +trait_name+
       # Used internally to manipulate such mappers (for example, skip some traits)
       # in some scenarios.
@@ -51,13 +59,23 @@ module Core
       def trait(trait_name)
         self_mountings.find{ |mount| mount.class.name.underscore =~ /#{trait_name}_trait$/ }
       end
-      private :trait
+
+      # Return :extension trait, if present
+      #
+      # @return [Core::FlatMap::Mapper]
+      def extension
+        trait(:extension)
+      end
 
       # Return only mountings that are actually traits for host mapper.
       #
       # @return [Array<Core::FlatMap::Mapper>]
       def trait_mountings
-        mountings.select{ |m| m.owned? }
+        result = mountings.select{ |m| m.owned? }
+        # mapper extension has more priority then traits, and
+        # has to be processed first.
+        result.unshift(result.pop) if result.length > 1 && result[-1].extension?
+        result
       end
       protected :trait_mountings
 
@@ -68,6 +86,13 @@ module Core
         mountings.select{ |m| !m.owned? }
       end
       protected :mapper_mountings
+
+      # Return +true+ if +self+ is extension of host mapper.
+      #
+      # @return [Boolean]
+      def extension?
+        owned? && self.class.name =~ /ExtensionTrait$/
+      end
     end
   end
 end

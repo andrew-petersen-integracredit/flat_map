@@ -89,14 +89,6 @@ module Core
         mountings.map{ |m| m.owned? ? m.nearest_mountings : m }.flatten
       end
 
-      # Return a list of all mountings that represent full picture of +self+, i.e.
-      # +self+ and all traits, including deeply nested, that are mounted on self
-      #
-      # @return [Array<Core::FlatMap::Mapper>]
-      def self_mountings
-        mountings.select(&:owned?).map{ |m| m.self_mountings }.flatten.concat [self]
-      end
-
       # Return a list of all mountings (mapper objects) associated with +self+.
       #
       # Overridden in {Traits}. Left here for consistency.

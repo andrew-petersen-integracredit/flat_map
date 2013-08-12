@@ -18,14 +18,14 @@ module Core
     #   class CustomerMapper < Core::FlatMap::Mapper
     #     # When there is no need to rename attributes, they can be passed as array:
     #     map :first_name, :last_name
-    #     
+    #
     #     # When hash is used, it will map field name to attribute name:
     #     map :dob => :date_of_birth
-    #     
+    #
     #     # Also, additional options can be used:
     #     map :name_suffix, :format => :enum
     #     map :password, :reader => false, :writer => :assign_password
-    #     
+    #
     #     # Or you can combine all definitions together if they all are common:
     #     map :first_name, :last_name,
     #         :dob    => :date_of_birth,
@@ -65,13 +65,13 @@ module Core
     #   class CustomerMapper < Core::FlatMap::Mapper
     #     map :first_name, :last_name
     #   end
-    #   
+    #
     #   class CustomerAccountMapper < Core::FlatMap::Mapper
     #     map :source, :brand, :format => :enum
-    #   
+    #
     #     mount :customer
     #   end
-    #   
+    #
     #   mapper = CustomerAccountMapper.find(1)
     #   mapper.read # => {:first_name => 'John', :last_name => 'Smith', :source => nil, :brand => 'TLP'}
     #   mapper.write(params) # Will assign params for both CustomerAccount and Customer records
@@ -91,18 +91,18 @@ module Core
     #
     #   class CustomerAccountMapper < Core::FlatMap::Mapper
     #     map :brand, :format => :enum
-    #     
+    #
     #     trait :with_email do
     #       map :source, :format => :enum
-    #       
+    #
     #       mount :email_address
-    #       
+    #
     #       trait :with_email_phones_residence do
     #         mount :customer, :traits => [:with_phone_numbers, :with_residence]
     #       end
     #     end
     #   end
-    #   
+    #
     #   CustomerAccountMapper.find(1).read # => {:brand => 'TLP'}
     #   CustomerAccountMapper.find(1, :with_email).read # => {:brand => 'TLP', :source => nil, :email_address => 'j.smith@gmail.com'}
     #   CustomerAccountMapper.find(1, :with_email_phone_residence).read # => :brand, :source, :email_address, phone numbers,
@@ -117,10 +117,10 @@ module Core
     #     mount :customer do
     #       map :dob => :date_of_birth, :format => :i18n_l
     #       validates_presence_of :dob
-    #       
+    #
     #       mount :unique_identifier
     #       mount :drivers_license, :traits => :person_name_with_callback
-    #       
+    #
     #       validates_acceptance_of :esign_consent, :message => "You must check this box to continue"
     #     end
     #   end
@@ -142,7 +142,7 @@ module Core
     # call for <tt>Core::FlatMap::Mapper</tt>). This allows you to control flow of mapper saving:
     #
     #   set_callback :save, :before, :set_model_validation
-    #   
+    #
     #   def set_model_validation
     #     target.use_validation :some_themis_validation
     #   end
@@ -155,21 +155,21 @@ module Core
     #
     #   class CustomerAccountMapper < Core::FlatMap::Mapper
     #     self.target_class_name = 'CustomerAccount::Active'
-    #   
+    #
     #     # some definitions
-    #   
+    #
     #     trait :with_bank_account_selection do
     #       attr_reader :selected_bank_account_id
-    #   
+    #
     #       mount :bank_account
-    #   
+    #
     #       set_callback :validate, :before, :ignore_new_bank_account
     #       set_callback :save, :after, :update_application
-    #   
+    #
     #       def ignore_new_bank_account
     #         mounting(:bank_account).skip! if bank_account_selected?
     #       end
-    #   
+    #
     #       # some more definitions
     #     end
     #   end
@@ -214,6 +214,8 @@ module Core
       attr_writer :host
       attr_reader :target, :traits
       attr_accessor :owner, :name
+
+      delegate :logger, :to => :target
 
       # Callback to dup mappings and mountings on inheritance.
       # The values are cloned from actual mappers (i.e. something

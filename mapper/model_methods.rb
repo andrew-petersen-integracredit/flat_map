@@ -182,8 +182,11 @@ module Core
       # Return +true+ if the mapper is valid, i.e. if it is valid itself, and if
       # all mounted mappers (traits and other mappers) are also valid.
       #
+      # @param [Symbol] context useless context parameter to make it compatible with
+      #   ActiveRecord models.
+      #
       # @return [Boolean]
-      def valid?
+      def valid?(context = nil)
         res = trait_mountings.map(&:valid?).all?
         res = super && res # we do want to call super
         mounting_res = mapper_mountings.map(&:valid?).all?

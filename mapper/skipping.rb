@@ -33,8 +33,11 @@ module Core
       # Override {Core::FlatMap::Mapper::ModelMethods#valid?} to
       # force it to return +true+ if +self+ is marked for skipping.
       #
+      # @param [Symbol] context useless context parameter to make it compatible with
+      #   ActiveRecord models.
+      #
       # @return [Boolean]
-      def valid?
+      def valid?(context = nil)
         skipped? || super
       end
 

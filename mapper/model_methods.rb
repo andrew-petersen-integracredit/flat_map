@@ -182,11 +182,11 @@ module Core
       # Return +true+ if the mapper is valid, i.e. if it is valid itself, and if
       # all mounted mappers (traits and other mappers) are also valid.
       #
-      # @param [Symbol] context useless context parameter to make it compatible with
-      #   ActiveRecord models.
+      # Accepts any parameters, but doesn't use them to be compatible with
+      # ActiveRecord calls.
       #
       # @return [Boolean]
-      def valid?(context = nil)
+      def valid?(*)
         res = trait_mountings.map(&:valid?).all?
         res = super && res # we do want to call super
         mounting_res = mapper_mountings.map(&:valid?).all?
@@ -203,6 +203,13 @@ module Core
         end
       end
       private :consolidate_errors!
+
+      # Overriden to use {Core::FlatMap::Errors} instead of ActiveModel ones.
+      #
+      # @return [Core::FlatMap::Errors]
+      def errors
+        @errors ||= Core::FlatMap::Errors.new(self)
+      end
 
       # Extract Rails multiparam parameters from the +params+, modifying
       # original hash. Behaves somewhat like

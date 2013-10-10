@@ -158,6 +158,8 @@ module Core
       def method_missing(name, *args, &block)
         return super if name == :to_ary || Core::FlatMap::Mapper.protected_instance_methods.include?(name)
 
+        return self[name] if mapping(name).present?
+
         mounting = all_mountings.find{ |m| m.respond_to?(name) }
         return super if mounting.nil?
         mounting.send(name, *args, &block)

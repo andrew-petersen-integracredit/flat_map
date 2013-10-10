@@ -88,8 +88,14 @@ module Core
       def target_from_association(owner_target)
         return unless owner_target.kind_of?(ActiveRecord::Base)
 
-        if @options.key?(:mounting_point)
-          return @options[:mounting_point].call(owner_target)
+        # :mounting_point is deprecated option name for target
+        if @options.key?(:mounting_point) || @options.key?(:target)
+          target = @options[:target] || @options[:mounting_point]
+          if target.is_a? Proc
+            return @options[:mounting_point].call(owner_target)
+          else
+            return target
+          end
         end
 
         reflection = reflection_from_target(owner_target)
@@ -152,6 +158,13 @@ module Core
           new_one.host = mapper
           new_one.name = @identifier
           new_one.save_order = save_order
+
+          if (suffix = @options[:suffix] || mapper.suffix).present?
+            new_one.suffix = suffix
+            new_one.name   = :"#{@identifier}_#{suffix}"
+          else
+            new_one.name = @identifier
+          end
         end
         new_one
       end

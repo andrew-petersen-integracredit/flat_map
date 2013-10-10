@@ -87,6 +87,32 @@ module Core
         end
       end
 
+      # Retrieve mapping value via its name, which might differ from its
+      # full_name, if suffix was used.
+      #
+      # @param [Symbol] name
+      def [](name)
+        mapping(name).try(:read)
+      end
+
+      # Write value to mapping specified by name, which might differ from its
+      # full_name, if suffix was used.
+      #
+      # @param [Symbol] name
+      # @param [Object] value
+      def []=(name, value)
+        mapping(name).try(:write, value)
+      end
+
+      # Lookup mapping by its name, which might differ from its
+      # full_name, if suffix was used.
+      #
+      # @param [Symbol] name
+      # @return [Core::FlatMap::Mapping]
+      def mapping(name)
+        mappings.find{ |m| m.name == name }
+      end
+
       # Return a list of mappings associated to +self+.
       #
       # @return [Core::FlatMap::Mapping]

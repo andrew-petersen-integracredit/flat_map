@@ -48,6 +48,12 @@ module Core
         end
         super
       end
+
+      # Overridden to add suffixing support for mappings of mappers with name suffix
+      def add(attr, *args)
+        attr = :"#{attr}_#{@base.suffix}" if attr != :base && @base.suffixed?
+        super
+      end
     end
   end
 end

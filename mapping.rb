@@ -9,7 +9,7 @@ module Core
       autoload :Writer
       autoload :Factory
 
-      attr_reader :mapper, :name, :target_attribute
+      attr_reader :mapper, :name, :full_name, :target_attribute
       attr_reader :reader, :writer
       attr_reader :multiparam
 
@@ -40,6 +40,8 @@ module Core
         @name             = name
         @target_attribute = target_attribute
 
+        @full_name = mapper.suffixed? ? :"#{@name}_#{mapper.suffix}" : name
+
         @multiparam = options[:multiparam]
 
         fetch_reader(options)
@@ -55,21 +57,21 @@ module Core
       end
 
       # Lookup the passed hash of params for the key that corresponds
-      # to the +name+ of +self+, and write it if it is present.
+      # to the +full_name+ of +self+, and write it if it is present.
       #
       # @param [Hash] params
       # @return [Object] value assigned
       def write_from_params(params)
-        write(params[name]) if params.key?(name) && writer.present?
+        write(params[full_name]) if params.key?(full_name) && writer.present?
       end
 
       # Return a hash of a single key => value pair, where key
-      # corresponds to +name+ and +value+ to value read from
+      # corresponds to +full_name+ and +value+ to value read from
       # +target+. If +reader+ is not set, return an empty hash.
       #
       # @return [Hash]
       def read_as_params
-        reader ? {name => read} : {}
+        reader ? {full_name => read} : {}
       end
 
       # Instantiate a +reader+ object based on the <tt>:reader</tt>

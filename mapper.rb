@@ -77,10 +77,15 @@ module Core
     #   mapper.write(params) # Will assign params for both CustomerAccount and Customer records
     #
     # The following options may be used when mounting a mapper:
-    # [<tt>:mounting_point</tt>] Allows to manually specify target for the new mapper. May be very handy
-    #                            when target cannot be obviously detected or requires additional setup:
-    #                            <tt>mount :title, :mounting_point => lambda{ |customer| customer.title_customers.build.build_title }</tt>
+    # [<tt>:mapper_class</tt>] Specifies mapper class if it cannot be determined from mounting itself
+    # [<tt>:target</tt>] Allows to manually specify target for the new mapper. May be oject or lambda
+    #                    with arity of one that accepts host mapper target as argument. Comes in handy
+    #                    when target cannot be obviously detected or requires additional setup:
+    #                    <tt>mount :title, :target => lambda{ |customer| customer.title_customers.build.build_title }</tt>
+    # [<tt>:mounting_point</tt>] Deprecated option name for :target
     # [<tt>:traits</tt>] Specifies list of traits to be used by mounted mapper
+    # [<tt>:suffix</tt>] Specifies the suffix that will be appended to all mappings and mountings of mapper,
+    #                    as well as mapper name itself.
     #
     # === Traits
     #
@@ -211,7 +216,7 @@ module Core
       include Skipping
       include Skipping::ActiveRecord
 
-      attr_writer :host
+      attr_writer :host, :suffix
       attr_reader :target, :traits
       attr_accessor :owner, :name
 
@@ -278,6 +283,20 @@ module Core
       # @return [Boolean]
       def hosted?
         host.present?
+      end
+
+      # +suffix+ reader. Delegated to owner for owned mappers.
+      #
+      # @return [String, nil]
+      def suffix
+        owned? ? owner.suffix : @suffix
+      end
+
+      # Return +true+ if +suffix+ is present.
+      #
+      # @return [Boolean]
+      def suffixed?
+        suffix.present?
       end
     end
   end

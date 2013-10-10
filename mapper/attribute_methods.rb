@@ -20,7 +20,7 @@ module Core
         end
 
         mappings    = all_mappings
-        valid_names = mappings.map{ |m| [m.name, "#{m.name}=".to_sym] }.flatten
+        valid_names = mappings.map{ |m| [m.full_name, "#{m.full_name}=".to_sym] }.flatten
 
         return super unless valid_names.include?(name)
 
@@ -37,9 +37,9 @@ module Core
       def attribute_methods(mappings)
         Module.new do
           mappings.each do |mapping|
-            define_method(mapping.name){ |*args| mapping.read(*args) }
+            define_method(mapping.full_name){ |*args| mapping.read(*args) }
 
-            define_method("#{mapping.name}=") do |value|
+            define_method("#{mapping.full_name}=") do |value|
               mapping.write(value)
             end
           end

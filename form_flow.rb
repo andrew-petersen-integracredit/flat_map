@@ -116,12 +116,12 @@ module Core
         end
       end
 
-      class_attribute :mapper_name, :before_each, :after_each
+      class_attribute :mapper_name, :default_traits, :before_each, :after_each
 
       attr_reader :controller, :step_name, :mapper
 
       delegate :params, :session, :to => :controller
-      delegate :mapper_extension, :traits, :to => :current_step
+      delegate :mapper_extension, :to => :current_step
       delegate :target, :to => :mapper
 
       # Callback to clone steps for inherited FormFlow.
@@ -215,8 +215,10 @@ module Core
       #
       # @param [Symbol] mapper_name
       # @return [Symbol]
-      def self.mount(mapper_name)
+      def self.mount(mapper_name, options = {})
+        options.assert_valid_keys(:traits)
         self.mapper_name = mapper_name
+        self.default_traits = Array.wrap(options[:traits])
       end
 
       # Shortcut to return desired step by its name or index.
@@ -369,6 +371,13 @@ module Core
       def find_mapper
         target_id = session[mapper_session_key]
         mapper_class.find(target_id, *traits, &mapper_extension)
+      end
+
+      # Return +traits+ as a unique set of default traits and step-specific traits
+      #
+      # @return [Array<Symbol>]
+      def traits
+        (default_traits + Array.wrap(current_step.traits)).uniq
       end
 
       # Fetch a mapper class based on current_mapper_name.

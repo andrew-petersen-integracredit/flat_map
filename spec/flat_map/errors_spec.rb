@@ -1,0 +1,17 @@
+require 'spec_helper'
+
+describe FlatMap::Errors do
+  let(:errors){ described_class.new(mock('mapper', :suffixed? => true, :suffix => 'foo', 'attr_foo' => 2)) }
+
+  it "preserved errors should appear on #empty? call exactly once" do
+    errors.preserve :base, 'an error'
+    errors.should_not be_empty
+    errors[:base].should == ['an error']
+    expect{ errors.empty? }.not_to change{ errors[:base].length }
+  end
+
+  it "should add error to mapper with suffix" do
+    errors.add(:attr, 'an error')
+    errors[:attr_foo].should == ['an error']
+  end
+end

@@ -21,7 +21,8 @@ Gem::Specification.new do |s|
   s.require_paths = ["lib"]
 
   # specify any dependencies here; for example:
-  s.add_dependency(%q<activesupport activerecorc>, ["~> 3.2"])
+  s.add_dependency(%q<activesupport>, ["~> 3.2"])
+  s.add_dependency(%q<activerecord>, ["~> 3.2"])
 
   s.add_development_dependency "rspec"
   s.add_development_dependency "rake"

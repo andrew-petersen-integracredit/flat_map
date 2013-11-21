@@ -1,6 +1,0 @@
-FlatMap
--------
-
-# TODO
-
-Write README

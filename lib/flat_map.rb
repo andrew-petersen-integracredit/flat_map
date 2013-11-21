@@ -1,4 +1,4 @@
-require 'active_support/core_ext/module/delegation'
+require 'active_support/core_ext'
 require 'active_record'
 
 require "flat_map/version"

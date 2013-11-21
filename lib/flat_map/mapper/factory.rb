@@ -63,7 +63,24 @@ module FlatMap
 
       return owner_target if traited?
 
-      target_from_association(owner_target) || target_from_name(owner_target)
+      explicit_target(owner_target) || target_from_association(owner_target) || target_from_name(owner_target)
+    end
+
+    # Try to use explicit target definition passed in options to fetch a
+    # target. If this value is a +Proc+, will call it with owner target as
+    # argument.
+    #
+    # @param [Object] owner_target
+    # @return [Object, nil] target for new mapper.
+    def explicit_target(owner_target)
+      if @options.key?(:target)
+        target = @options[:target]
+        if target.is_a? Proc
+          target.call(owner_target)
+        else
+          target
+        end
+      end
     end
 
     # Try to fetch the target for a new mapper being mounted, based on
@@ -86,16 +103,6 @@ module FlatMap
     #   end
     def target_from_association(owner_target)
       return unless owner_target.kind_of?(ActiveRecord::Base)
-
-      # :mounting_point is deprecated option name for target
-      if @options.key?(:mounting_point) || @options.key?(:target)
-        target = @options[:target] || @options[:mounting_point]
-        if target.is_a? Proc
-          return @options[:mounting_point].call(owner_target)
-        else
-          return target
-        end
-      end
 
       reflection = reflection_from_target(owner_target)
       return unless reflection.present?

@@ -67,7 +67,7 @@ module FlatMap
       def default_target_class_name
         ancestor_classes = ancestors.select{ |a| a.is_a? Class }
         core_mapper_index = ancestor_classes.index(::FlatMap::Mapper)
-        ancestor_classes[core_mapper_index - 1].name[/^(\w+)Mapper.*$/, 1]
+        ancestor_classes[core_mapper_index - 1].name[/^([\w:]+)Mapper.*$/, 1]
       end
     end
 
@@ -221,7 +221,7 @@ module FlatMap
     def extract_multiparams!(params)
       all_mappings.select(&:multiparam?).each do |mapping|
         param_keys = params.keys.
-          select{ |k| k.to_s =~ /#{mapping.name}\(\d+[isf]\)/ }.
+          select{ |k| k.to_s =~ /#{mapping.full_name}\(\d+[isf]\)/ }.
           sort_by{ |k| k.to_s[/\((\d+)\w*\)/, 1].to_i }
 
         next if param_keys.empty?

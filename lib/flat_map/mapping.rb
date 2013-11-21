@@ -86,7 +86,7 @@ module FlatMap
         when Proc
           Reader::Proc.new(self, options[:reader])
         when false
-          @reader = nil
+          nil
         else
           options.key?(:format) ? Reader::Formatted.new(self, options[:format]) : Reader::Basic.new(self)
         end
@@ -102,13 +102,13 @@ module FlatMap
       @writer =
         case options[:writer]
         when Symbol, String
-          @writer = Writer::Method.new(self, options[:writer])
+          Writer::Method.new(self, options[:writer])
         when Proc
-          @writer = Writer::Proc.new(self, options[:writer])
+          Writer::Proc.new(self, options[:writer])
         when false
-          @writer = false
+          nil
         else
-          @writer = Writer::Basic.new(self)
+          Writer::Basic.new(self)
         end
     end
     private :fetch_writer

@@ -39,7 +39,7 @@ module FlatMap
       end
     end
 
-    # Extend original {FlatMap::Mapping#read} method to take
+    # Extend original {Mapping#read} method to take
     # into account mountings of mounted mappers.
     #
     # @return [Hash] read values
@@ -49,7 +49,7 @@ module FlatMap
       end
     end
 
-    # Extend original {FlatMap::Mapping#write} method to pass
+    # Extend original {Mapping#write} method to pass
     # +params+ to mounted mappers.
     #
     # Overridden in {ModelMethods}. Left here for consistency.

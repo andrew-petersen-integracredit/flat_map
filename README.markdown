@@ -77,7 +77,7 @@ the host mapper itself, but may be defined manually.
     mount :customer
   end
   mapper = CustomerAccountMapper.find(1)
-  mapper.read # => {:first_name => 'John', :last_name => 'Smith', :source => nil, :brand => 'TLP'}
+  mapper.read # => {:first_name => 'John', :last_name => 'Smith', :source => nil, :brand => 'FTW'}
   mapper.write(params) # Will assign params for both CustomerAccount and Customer records
 ```
 
@@ -88,7 +88,6 @@ The following options may be used when mounting a mapper:
             with arity of one that accepts host mapper target as argument. Comes in handy
             when target cannot be obviously detected or requires additional setup:
             `mount :title, :target => lambda{ |customer| customer.title_customers.build.build_title }`
-* `:mounting_point` Deprecated option name for :target
 * `:traits` Specifies list of traits to be used by mounted mapper
 * `:suffix` Specifies the suffix that will be appended to all mappings and mountings of mapper,
             as well as mapper name itself.
@@ -127,9 +126,10 @@ mapper and acts as an anonymous trait. For example:
     mount :customer do
       map :dob => :date_of_birth, :format => :i18n_l
       validates_presence_of :dob
+
       mount :unique_identifier
-      mount :drivers_license, :traits => :person_name_with_callback
-      validates_acceptance_of :esign_consent, :message => "You must check this box to continue"
+
+      validates_acceptance_of :mandatory_agreement, :message => "You must check this box to continue"
     end
   end
 ```
@@ -163,17 +163,20 @@ In some cases, it is required to omit mapper processing after it has been create
 method calls without performing any other operations. For example:
 
 ```ruby
-  class CustomerAccountMapper < FlatMap::Mapper
-    self.target_class_name = 'CustomerAccount::Active'
+  class CustomerMapper < FlatMap::Mapper
     # some definitions
-    trait :with_bank_account_selection do
-      attr_reader :selected_bank_account_id
-      mount :bank_account
-      set_callback :validate, :before, :ignore_new_bank_account
-      set_callback :save, :after, :update_application
+
+    trait :product_selection do
+      attr_reader :selected_product_id
+
+      mount :product
+
+      set_callback :validate, :before, :ignore_new_product
+
       def ignore_new_bank_account
-        mounting(:bank_account).skip! if bank_account_selected?
+        mounting(:product).skip! if product_selected?
       end
+
       # some more definitions
     end
   end

@@ -12,12 +12,12 @@ module FlatMap
       MAPPING_OPTIONS = [:reader, :writer, :format, :multiparam].freeze
 
       # Define single or multiple mappings at a time. Usually, a Hash
-      # is passed in a form {mapping_name => target_attribute}. All keys
-      # that are listed under MAPPING_OPTIONS will be extracted and used
+      # is passed in a form !{mapping_name => target_attribute}. All keys
+      # that are listed under {MAPPING_OPTIONS} will be extracted and used
       # as modifiers for new mappings.
       #
       # Also, mapping names may be listed as an array preceding the hash.
-      # In that case, its elements are treated as {mapping_name => mapping_name}
+      # In that case, its elements are treated as !{mapping_name => mapping_name}
       # mapping elements.
       #
       # Example:
@@ -65,7 +65,7 @@ module FlatMap
     # Send passed +params+ +write_from_params+ method of each
     # of the mappings of +self+.
     #
-    # Overloaded in {Mountings}.
+    # Overloaded in {Mapper::Mounting}.
     #
     # @param [Hash] params
     # @return [Hash] params

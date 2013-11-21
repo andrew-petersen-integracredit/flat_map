@@ -38,7 +38,7 @@ module FlatMap
     end
 
     # Overloaded to add <tt>@preserved_errors</tt> to the list of
-    # original <tt>@messages</tt>. <tt>@preserved_errors<tt> are
+    # original <tt>@messages</tt>. <tt>@preserved_errors</tt> are
     # cleared after this method call.
     def empty?
       unless @preserved_errors.empty?

@@ -13,3 +13,13 @@ Rake::RDocTask.new do |rdoc|
   rdoc.rdoc_files.include('README*')
   rdoc.rdoc_files.include('lib/**/*.rb')
 end
+
+namespace :gemfury do
+  gem_version   = FlatMap::VERSION
+  gem_file_name = "flat_map-#{gem_version}.gem"
+  desc "Build version #{gem_version} into the pkg directory and upload to GemFury"
+  task :push => [:build] do
+    sh "fury push pkg/#{gem_file_name} --as=TMXCredit"
+  end
+end
+

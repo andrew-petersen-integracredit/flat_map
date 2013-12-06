@@ -43,7 +43,7 @@ module FlatMap
     end
   end
 
-  describe 'Mapper Validations' do
+  describe 'Validations' do
     let(:mapper) do
       ValidationsSpec::HostMapper.new(ValidationsSpec::TargetClass.new, :with_trait) do
         map :attr_c

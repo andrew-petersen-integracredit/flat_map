@@ -180,54 +180,18 @@ module FlatMap
   #   mapper.read[:first_name] # => John
   #   mapper.first_name # => 'John'
   #   mapper.last_name = 'Smith'
-  class Mapper
-    # Raised when mapper is initialized with no target defined
-    class NoTargetError < ArgumentError
-      # Initializes exception with a describing message for +mapper+
-      #
-      # @param [FlatMap::Mapper] mapper
-      def initialize(mapper)
-        super("Target object is required to initialize mapper #{mapper.inspect}")
-      end
-    end
-
+  class Mapper < BaseMapper
     extend ActiveSupport::Autoload
 
-    autoload :Mapping
-    autoload :Mounting
-    autoload :Traits
-    autoload :Factory
-    autoload :AttributeMethods
-    autoload :ModelMethods
+    autoload :Targeting
     autoload :Skipping
 
-    include Mapping
-    include Mounting
-    include Traits
-    include AttributeMethods
-    include ActiveModel::Validations
-    include ModelMethods
+    include Targeting
     include Skipping
-    include Skipping::ActiveRecord
 
-    attr_writer :host, :suffix
-    attr_reader :target, :traits
-    attr_accessor :owner, :name
+    attr_reader :target
 
     delegate :logger, :to => :target
-
-    # Callback to dup mappings and mountings on inheritance.
-    # The values are cloned from actual mappers (i.e. something
-    # like CustomerAccountMapper, since it is useless to clone
-    # empty values of FlatMap::Mapper).
-    #
-    # Note: those class attributes are defined in {Mapping}
-    # and {Mounting} modules.
-    def self.inherited(subclass)
-      return unless self < FlatMap::Mapper
-      subclass.mappings  = mappings.dup
-      subclass.mountings = mountings.dup
-    end
 
     # Initializes +mapper+ with +target+ and +traits+, which are
     # used to fetch proper list of mounted mappers. Raises error
@@ -237,60 +201,13 @@ module FlatMap
     # @param [*Symbol] traits List of traits
     # @raise [FlatMap::Mapper::NoTargetError]
     def initialize(target, *traits)
-      raise NoTargetError.new(self) unless target.present?
+      raise Targeting::NoTargetError.new(self.class) unless target.present?
 
       @target, @traits = target, traits
 
       if block_given?
         singleton_class.trait :extension, &Proc.new
       end
-    end
-
-    # Return a simple string representation of +mapper+. Done so to
-    # avoid really long inspection of internal objects (target -
-    # usually AR model, mountings and mappings)
-    # @return [String]
-    def inspect
-      to_s
-    end
-
-    # Return +true+ if +mapper+ is owned. This means that current
-    # mapper is actually a trait. Thus, it is a part of an owner
-    # mapper.
-    #
-    # @return [Boolean]
-    def owned?
-      owner.present?
-    end
-
-    # If mapper was mounted by another mapper, host is the one who
-    # mounted +self+.
-    #
-    # @return [FlatMap::Mapper]
-    def host
-      owned? ? owner.host : @host
-    end
-
-    # Return +true+ if mapper is hosted, i.e. it is mounted by another
-    # mapper.
-    #
-    # @return [Boolean]
-    def hosted?
-      host.present?
-    end
-
-    # +suffix+ reader. Delegated to owner for owned mappers.
-    #
-    # @return [String, nil]
-    def suffix
-      owned? ? owner.suffix : @suffix
-    end
-
-    # Return +true+ if +suffix+ is present.
-    #
-    # @return [Boolean]
-    def suffixed?
-      suffix.present?
     end
   end
 end

@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe FlatMap::Errors do
-  let(:errors){ described_class.new(mock('mapper', :suffixed? => true, :suffix => 'foo', 'attr_foo' => 2)) }
+  let(:errors){ described_class.new(double('mapper', :suffixed? => true, :suffix => 'foo', 'attr_foo' => 2)) }
 
   it "preserved errors should appear on #empty? call exactly once" do
     errors.preserve :base, 'an error'

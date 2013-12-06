@@ -1,10 +1,7 @@
 module FlatMap
   # This small module allows mappers to define traits, which technically
   # means mounting anonymous mappers, attached to host one.
-  #
-  # Also, FlatMap::Mapper::Mounting#mountings completely overridden
-  # here to support special trait behavior.
-  module Mapper::Traits
+  module BaseMapper::Traits
     extend ActiveSupport::Concern
 
     # Traits class macros
@@ -16,35 +13,34 @@ module FlatMap
       #
       # @param [Symbol] name
       def trait(name, &block)
-        mapper_class      = Class.new(FlatMap::Mapper, &block)
+        base_class        = self < FlatMap::Mapper ? FlatMap::Mapper : FlatMap::EmptyMapper
+        mapper_class      = Class.new(base_class, &block)
         mapper_class_name = "#{ancestors.first.name}#{name.to_s.camelize}Trait"
         mapper_class.singleton_class.send(:define_method, :name){ mapper_class_name }
         mount mapper_class, :trait_name => name
       end
     end
 
-    # Override the original {FlatMap::Mapper::Mounting#mountings}
+    # Override the original {FlatMap::BaseMapper::Mounting#mountings}
     # method to filter out those traited mappers that are not required for
     # trait setup of +self+. Also, handle any inline extension that may be
     # defined on the mounting mapper, which is attached as a singleton trait.
     #
-    # @return [Array<FlatMap::Mapper>]
+    # @return [Array<FlatMap::BaseMapper>]
     def mountings
-      @mountings ||= begin
-        mountings = self.class.mountings.
-                               reject{ |factory|
-                                 factory.traited? &&
-                                 !factory.required_for_any_trait?(traits)
-                               }
-        mountings.concat(singleton_class.mountings)
-        mountings.map{ |factory| factory.create(self, *traits) }
-      end
+      mountings = self.class.mountings.
+                             reject{ |factory|
+                               factory.traited? &&
+                               !factory.required_for_any_trait?(traits)
+                             }
+      mountings.concat(singleton_class.mountings)
+      super(mountings)
     end
 
     # Return a list of all mountings that represent full picture of +self+, i.e.
     # +self+ and all traits, including deeply nested, that are mounted on self
     #
-    # @return [Array<FlatMap::Mapper>]
+    # @return [Array<FlatMap::BaseMapper>]
     def self_mountings
       mountings.select(&:owned?).map{ |m| m.self_mountings }.flatten.concat [self]
     end
@@ -54,21 +50,21 @@ module FlatMap
     # in some scenarios.
     #
     # @param [Symbol] trait_name
-    # @return [FlatMap::Mapper, nil]
+    # @return [FlatMap::BaseMapper, nil]
     def trait(trait_name)
       self_mountings.find{ |mount| mount.class.name.underscore =~ /#{trait_name}_trait$/ }
     end
 
     # Return :extension trait, if present
     #
-    # @return [FlatMap::Mapper]
+    # @return [FlatMap::BaseMapper]
     def extension
       trait(:extension)
     end
 
     # Return only mountings that are actually traits for host mapper.
     #
-    # @return [Array<FlatMap::Mapper>]
+    # @return [Array<FlatMap::BaseMapper>]
     def trait_mountings
       result = mountings.select{ |m| m.owned? }
       # mapper extension has more priority then traits, and
@@ -80,7 +76,7 @@ module FlatMap
 
     # Return only mountings that correspond to external mappers.
     #
-    # @return [Array<FlatMap::Mapper>]
+    # @return [Array<FlatMap::BaseMapper>]
     def mapper_mountings
       mountings.select{ |m| !m.owned? }
     end

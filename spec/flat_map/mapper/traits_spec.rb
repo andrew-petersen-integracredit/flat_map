@@ -38,7 +38,7 @@ module FlatMap
     end
   end
 
-  describe Mapper::Traits do
+  describe 'Traits' do
     describe 'trait definition' do
       it "should add a traited mapper factory to a class" do
         TraitsSpec::EmptyMapper.should_receive(:mount).with(kind_of(Class), :trait_name => :a_trait).and_call_original

@@ -26,7 +26,7 @@ module FlatMap
     end
   end
 
-  describe Mapper::ModelMethods do
+  describe 'Working with Target' do
     describe '#target_class' do
       it 'should detect target_class from mapper class name' do
         ModelMethodsSpec::TargetClassMapper.target_class.should == ModelMethodsSpec::TargetClass

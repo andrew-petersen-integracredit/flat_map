@@ -2,7 +2,7 @@ module FlatMap
   # This module hosts all definitions required to define and use mapping
   # functionality within mapper classes. This includes mapping definition
   # methods and basic reading and writing methods.
-  module Mapper::Mapping
+  module BaseMapper::Mapping
     extend ActiveSupport::Concern
 
     # Mapping class macros
@@ -65,7 +65,7 @@ module FlatMap
     # Send passed +params+ +write_from_params+ method of each
     # of the mappings of +self+.
     #
-    # Overloaded in {Mapper::Mounting}.
+    # Overloaded in {BaseMapper::Mounting}.
     #
     # @param [Hash] params
     # @return [Hash] params

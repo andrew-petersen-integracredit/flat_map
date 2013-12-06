@@ -8,13 +8,13 @@ module FlatMap
   # NOTE: :to_ary method is called internally by Ruby 1.9.3 when we call
   # something like [mapper].flatten. And we DO want default behavior
   # for handling this missing method.
-  module Mapper::AttributeMethods
+  module BaseMapper::AttributeMethods
     # Lazily define reader and writer methods for all mappings available
     # to the mapper, and extend +self+ with it.
     def method_missing(name, *args, &block)
       if name == :to_ary ||
           @attribute_methods_defined ||
-          FlatMap::Mapper.protected_instance_methods.include?(name)
+          FlatMap::BaseMapper.protected_instance_methods.include?(name)
         return super
       end
 

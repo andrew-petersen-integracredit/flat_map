@@ -22,7 +22,7 @@ module FlatMap
     end
   end
 
-  describe Mapper::Skipping do
+  describe 'Skipping' do
     let(:mapper){ SkippingSpec::SpecMapper.new(OpenStruct.new, :with_trait) }
 
     before{ mapper.trait(:with_trait).skip! }
@@ -47,7 +47,7 @@ module FlatMap
     end
   end
 
-  describe Mapper::Skipping::ActiveRecord do
+  describe 'Skipping ActiveRecord' do
     let(:target){ OpenStruct.new }
     let(:mapper){ SkippingSpec::SpecMapper.new(target, :with_trait) }
 

@@ -37,7 +37,7 @@ module FlatMap
     end
   end
 
-  describe 'Mapper Callbacks' do
+  describe 'Callbacks' do
     let(:mapper) do
       CallbacksSpec::SpecMapper.new(OpenStruct.new, :with_b) do
         set_callback :validate, :before, :extension_set_b

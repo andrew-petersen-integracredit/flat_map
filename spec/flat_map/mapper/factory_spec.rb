@@ -1,13 +1,13 @@
 require 'spec_helper'
 
 module FlatMap
-  describe Mapper::Factory do
-    let(:trait_class){ FlatMap::Mapper }
+  describe BaseMapper::Factory do
+    let(:trait_class){ Class.new(Mapper) }
     let(:target){ Object.new }
     let(:other_target){ Object.new }
-    let(:mapper){ Mapper.new(target) }
-    let(:mount_factory){ Mapper::Factory.new(:spec_mount, :traits => :used_traits) }
-    let(:trait_factory){ Mapper::Factory.new(trait_class, :trait_name => :a_trait) }
+    let(:mapper){ Class.new(Mapper).new(target) }
+    let(:mount_factory){ BaseMapper::Factory.new(:spec_mount, :traits => :used_traits) }
+    let(:trait_factory){ BaseMapper::Factory.new(trait_class, :trait_name => :a_trait) }
 
     context 'when used for a trait' do
       subject{ trait_factory }
@@ -29,34 +29,34 @@ module FlatMap
 
     describe 'behavior' do
       describe '#mapper_class for mounted mappers' do
-        class ::SpecMountMapper; end
-        class Mapper::Factory::SpecMountMapper; end
+        class ::SpecMountMapper < Mapper; end
+        class BaseMapper::Factory::SpecMountMapper; end
 
         it "should be able to fetch class name from name" do
           mount_factory.mapper_class.should == ::SpecMountMapper
         end
 
         it "should use options if specified" do
-          factory = Mapper::Factory.new(:spec_mount, :mapper_class_name => 'FlatMap::Mapper::Factory::SpecMountMapper')
-          factory.mapper_class.should == ::FlatMap::Mapper::Factory::SpecMountMapper
+          factory = BaseMapper::Factory.new(:spec_mount, :mapper_class_name => 'FlatMap::BaseMapper::Factory::SpecMountMapper')
+          factory.mapper_class.should == ::FlatMap::BaseMapper::Factory::SpecMountMapper
         end
       end
 
-      describe '#fetch_target' do
+      describe '#fetch_target_from' do
         it "should return owner's target for traited factory" do
-          trait_factory.fetch_target(mapper).should == target
+          trait_factory.fetch_target_from(mapper).should == target
         end
 
         context 'explicit target' do
           it "should use explicitly specified if applicable" do
-            factory = Mapper::Factory.new(:mount, :target => other_target)
-            factory.fetch_target(mapper).should == other_target
+            factory = BaseMapper::Factory.new(:mount, :target => other_target)
+            factory.fetch_target_from(mapper).should == other_target
           end
 
           it "should call Proc and pass owner target to it if Proc is specified as :target" do
-            factory = Mapper::Factory.new(:mount, :target => lambda{ |obj| obj.foo })
+            factory = BaseMapper::Factory.new(:mount, :target => lambda{ |obj| obj.foo })
             target.should_receive(:foo).and_return(other_target)
-            factory.fetch_target(mapper).should == other_target
+            factory.fetch_target_from(mapper).should == other_target
           end
         end
 
@@ -72,28 +72,28 @@ module FlatMap
             # Note: has_one_current is not part of Rails
             mount_factory.should_receive(:reflection_from_target).with(target).and_return(has_one_current_reflection)
             target.should_receive(:effective_spec_mount).and_return(other_target)
-            mount_factory.fetch_target(mapper).should == other_target
+            mount_factory.fetch_target_from(mapper).should == other_target
           end
 
           it "should refer to existing association object if possible, and build it if it is absent for :has_one" do
             mount_factory.should_receive(:reflection_from_target).with(target).and_return(has_one_reflection)
             target.should_receive(:spec_mount).and_return(nil)
             target.should_receive(:build_spec_mount).and_return(other_target)
-            mount_factory.fetch_target(mapper).should == other_target
+            mount_factory.fetch_target_from(mapper).should == other_target
           end
 
           it "should refer to existing association object if possible, and build it if it is absent for :belongs_to" do
             mount_factory.should_receive(:reflection_from_target).with(target).and_return(belongs_to_reflection)
             target.should_receive(:spec_mount).and_return(nil)
             target.should_receive(:build_spec_mount).and_return(other_target)
-            mount_factory.fetch_target(mapper).should == other_target
+            mount_factory.fetch_target_from(mapper).should == other_target
           end
 
           it "should always build a new record for :has_many association" do
             mount_factory.should_receive(:reflection_from_target).with(target).and_return(has_many_reflection)
             target.should_receive(:association).with(:spec_mounts)
             target.stub_chain(:association, :build).and_return(other_target)
-            mount_factory.fetch_target(mapper).should == other_target
+            mount_factory.fetch_target_from(mapper).should == other_target
           end
 
           describe 'reflection_from_target' do
@@ -115,7 +115,7 @@ module FlatMap
         context 'target from name' do
           it 'should simply send method to owner target' do
             target.should_receive(:spec_mount).and_return(other_target)
-            mount_factory.fetch_target(mapper).should == other_target
+            mount_factory.fetch_target_from(mapper).should == other_target
           end
         end
       end
@@ -126,13 +126,23 @@ module FlatMap
           new_one.owner.should == mapper
         end
 
+        context 'mounted empty mapper' do
+          class ::SpecEmptyMountMapper < EmptyMapper; end
+          let(:factory){ BaseMapper::Factory.new(:spec_empty_mount) }
+
+          it 'should not call fetch_target_from' do
+            factory.should_not_receive(:fetch_target_from)
+            factory.create(mapper)
+          end
+        end
+
         context 'mounted mapper' do
           let(:mount_class){ Class.new(Mapper) }
           let(:factory){ mount_factory }
 
           before do
             factory.stub(:mapper_class).and_return(mount_class)
-            factory.stub(:fetch_target).and_return(other_target)
+            factory.stub(:fetch_target_from).and_return(other_target)
           end
 
           it 'should combine traits' do
@@ -149,7 +159,7 @@ module FlatMap
           end
 
           context 'when suffix is defined' do
-            let(:factory){ Mapper::Factory.new(:spec_mount, :suffix => :foo) }
+            let(:factory){ BaseMapper::Factory.new(:spec_mount, :suffix => :foo) }
 
             it "should adjust properties with suffix" do
               new_one = factory.create(mapper)
@@ -160,7 +170,7 @@ module FlatMap
 
           context 'when extension is present' do
             let(:extension){ Proc.new{} }
-            let(:factory){ Mapper::Factory.new(:spec_mount, &extension) }
+            let(:factory){ BaseMapper::Factory.new(:spec_mount, &extension) }
 
             it "should pass it to mapper initialization" do
               mount_class.should_receive(:new).with(other_target, &extension).and_call_original
@@ -170,7 +180,7 @@ module FlatMap
 
           describe 'save order' do
             context 'when explicitly set' do
-              let(:factory){ Mapper::Factory.new(:spec_mount, :save => :before) }
+              let(:factory){ BaseMapper::Factory.new(:spec_mount, :save => :before) }
 
               it 'should fetch from options, if possible' do
                 new_one = factory.create(mapper)

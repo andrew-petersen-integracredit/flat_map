@@ -28,7 +28,7 @@ module FlatMap
     class EmptyMapper < Mapper; end
   end
 
-  describe Mapper::Mapping do
+  describe 'Mapping' do
     context 'defining mappings' do
       it "should use Factory for defining mappings" do
         MappingSpec::EmptyMapper.should_receive(:define_mappings).once.

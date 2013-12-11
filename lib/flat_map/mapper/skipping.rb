@@ -1,66 +1,45 @@
 module FlatMap
-  # This helper module provides helper functionality that allow to
-  # exclude specific mapper from a processing chain.
+  # This helper module slightly enhances functionality of the
+  # {BaseMapper::Skipping} module for most commonly used +ActiveRecord+ targets.
+  # This is done to improve modularity of the {FlatMap} mappers.
   module Mapper::Skipping
-    extend ActiveSupport::Autoload
-
-    autoload :ActiveRecord
-
-    # Mark self as skipped, i.e. it will not be subject of
-    # validation and saving chain.
+    # Extend original #skip! method for Rails-models-based targets
+    #
+    # Note that this will mark the target record as
+    # destroyed if it is a new record. Thus, this
+    # record will not be a subject of Rails associated
+    # validation procedures, and will not be saved as an
+    # associated record.
     #
     # @return [Object]
     def skip!
-      @_skip_processing = true
+      super
+      if target.is_a?(ActiveRecord::Base)
+        if target.new_record?
+          # Using the instance variable directly as {ActiveRecord::Base#delete}
+          # will freeze the record.
+          target.instance_variable_set('@destroyed', true)
+        else
+          # Using reload instead of reset_changes! to reset associated nested
+          # model changes also
+          target.reload
+        end
+      end
     end
 
-    # Remove "skip" mark from +self+ and "destroyed" flag from
-    # the target.
+    # Extend original #use! method for Rails-models-based targets, as
+    # acoompanied to #skip! method.
     #
     # @return [Object]
     def use!
-      @_skip_processing = nil
-    end
-
-    # Return +true+ if +self+ was marked for skipping.
-    #
-    # @return [Boolean]
-    def skipped?
-      !!@_skip_processing
-    end
-
-    # Override {FlatMap::Mapper::ModelMethods#valid?} to
-    # force it to return +true+ if +self+ is marked for skipping.
-    #
-    # @param [Symbol] context useless context parameter to make it compatible with
-    #   ActiveRecord models.
-    #
-    # @return [Boolean]
-    def valid?(context = nil)
-      skipped? || super
-    end
-
-    # Override {FlatMap::Mapper::ModelMethods#save} method to
-    # force it to return +true+ if +self+ is marked for skipping.
-    #
-    # @return [Boolean]
-    def save
-      skipped? || super
-    end
-
-    # Override {FlatMap::Mapper::ModelMethods#shallow_save} method
-    # to make it possible to skip traits.
-    #
-    # @return [Boolean]
-    def shallow_save
-      skipped? || super
-    end
-
-    # Mark self as used and then delegated to original
-    # {FlatMap::Mapper::ModelMethods#write}.
-    def write(*)
-      use!
       super
+      if target.is_a?(ActiveRecord::Base)
+        if target.new_record?
+          target.instance_variable_set('@destroyed', false) 
+        else
+          all_nested_mountings.each(&:use!)
+        end
+      end
     end
   end
 end

@@ -6,7 +6,7 @@ module FlatMap
   #
   # Also, the +method_missing+ method is defined here to delegate the missing
   # method to the very first mounted mapper that responds to it.
-  module Mapper::Mounting
+  module BaseMapper::Mounting
     extend ActiveSupport::Concern
 
     included do
@@ -21,14 +21,14 @@ module FlatMap
       # mapper.
       #
       # @param [*Object] args
-      # @return [Array<FlatMap::Mapper::Factory>]
+      # @return [Array<FlatMap::BaseMapper::Factory>]
       def mount(*args, &block)
-        mountings << FlatMap::Mapper::Factory.new(*args, &block)
+        mountings << FlatMap::BaseMapper::Factory.new(*args, &block)
       end
 
       # List of mountings (factories) of a class.
       #
-      # @return [Array<FlatMap::Mapper>]
+      # @return [Array<FlatMap::BaseMapper>]
       def mountings
         @mountings ||= []
       end
@@ -52,7 +52,7 @@ module FlatMap
     # Extend original {Mapping#write} method to pass
     # +params+ to mounted mappers.
     #
-    # Overridden in {ModelMethods}. Left here for consistency.
+    # Overridden in {Persistence}. Left here for consistency.
     #
     # @param [Hash] params
     # @return [Hash] params
@@ -68,14 +68,14 @@ module FlatMap
 
     # Return list of mappings to be saved before saving target of +self+
     #
-    # @return [Array<FlatMap::Mapper>]
+    # @return [Array<FlatMap::BaseMapper>]
     def before_save_mountings
       nearest_mountings.select{ |m| m.save_order == :before }
     end
 
     # Return list of mappings to be saved after target of +self+ was saved
     #
-    # @return [Array<FlatMap::Mapper>]
+    # @return [Array<FlatMap::BaseMapper>]
     def after_save_mountings
       nearest_mountings.reject{ |m| m.save_order == :before }
     end
@@ -83,18 +83,20 @@ module FlatMap
     # Return all mountings that are mouted on +self+ directly or through
     # traits.
     #
-    # @return [Array<FlatMap::Mapper>]
+    # @return [Array<FlatMap::BaseMapper>]
     def nearest_mountings
       mountings.map{ |m| m.owned? ? m.nearest_mountings : m }.flatten
     end
 
     # Return a list of all mountings (mapper objects) associated with +self+.
     #
-    # Overridden in {Traits}. Left here for consistency.
+    # Overridden in {Traits}.
     #
-    # @return [Array<FlatMap::Mapper>]
-    def mountings
-      @mountings ||= self.class.mountings.map{ |factory| factory.create(self) }
+    # @param [Array<FlatMap::BaseMapper::Factory>] factories list of mapper factories
+    #   to mount. Defaults to the ones defined on class.
+    # @return [Array<FlatMap::BaseMapper>]
+    def mountings(factories = self.class.mountings)
+      @mountings ||= factories.map{ |factory| factory.create(self) }
     end
 
     # Return a mapping with the name that corresponds to passed +mounting_name+,
@@ -110,7 +112,7 @@ module FlatMap
     # list of all mountings of the owner. This will allow separate traits
     # to share methods via method_missing pattern.
     #
-    # @return [Array<FlatMap::Mapper>] mounted mappers (including traits)
+    # @return [Array<FlatMap::BaseMapper>] mounted mappers (including traits)
     def all_mountings
       return all_nested_mountings.unshift(self) unless owned?
       owner.all_mountings
@@ -119,7 +121,7 @@ module FlatMap
 
     # Return a list of mountings that are accessible by a named mapper.
     #
-    # @return [Array<FlatMap::Mapper>]
+    # @return [Array<FlatMap::BaseMapper>]
     def all_nested_mountings
       mountings.dup.concat(mountings.map{ |m| m.send(:all_nested_mountings) }).flatten
     end
@@ -149,13 +151,13 @@ module FlatMap
     protected :all_nested_mappings
 
     # Delegate missing method to any mounted mapping that respond to it,
-    # unless those methods are protected methods of FlatMap::Mapper.
+    # unless those methods are protected methods of FlatMap::BaseMapper.
     #
     # NOTE: :to_ary method is called internally by Ruby 1.9.3 when we call
     # something like [mapper].flatten. And we DO want default behavior
     # for handling this missing method.
     def method_missing(name, *args, &block)
-      return super if name == :to_ary || FlatMap::Mapper.protected_instance_methods.include?(name)
+      return super if name == :to_ary || FlatMap::BaseMapper.protected_instance_methods.include?(name)
 
       return self[name] if mapping(name).present?
 

@@ -3,7 +3,7 @@ module FlatMap
   # and to instantiate and setup corresponding mapper objects thereafter.
   # Factory objects are stored by mapper classes in opposite to actual
   # mounted mappers that are stored by mapper objects themselves.
-  class Mapper::Factory
+  class BaseMapper::Factory
     # Initializes factory with an identifier (name of a mounted mapper,
     # or the actual class for a trait) and a set of options. Those args
     # are used to create actual mapper object for the host mapper.
@@ -46,7 +46,7 @@ module FlatMap
     # Return the anonymous trait class if the factory defines a trait.
     # Fetch and return the class of a mapper defined by a symbol.
     #
-    # @return [Class] ancestor of {FlatMap::Mapper}
+    # @return [Class] ancestor of {FlatMap::BaseMapper}
     def mapper_class
       return @identifier if traited?
 
@@ -54,16 +54,44 @@ module FlatMap
       class_name.constantize
     end
 
+    # Return +true+ if factory should create targeted mapper.
+    #
+    # @return [Boolean]
+    def targeted_mount?
+      mapper_class < Mapper
+    end
+
     # Fetch the target for the mapper being created based on target of a host mapper.
     #
-    # @param [FlatMap::Mapper] mapper Host mapper
+    # @param [FlatMap::BaseMapper] mapper Host mapper
     # @return [Object] target for new mapper
-    def fetch_target(mapper)
+    def fetch_target_from(mapper)
+      return explicit_target!(mapper) if mapper.is_a?(EmptyMapper) && targeted_mount?
+
       owner_target = mapper.target
 
       return owner_target if traited?
 
       explicit_target(owner_target) || target_from_association(owner_target) || target_from_name(owner_target)
+    end
+
+    # When creating mappers mounted on top of EmptyMapper, target cannot be implicitly
+    # fetched from it and should be specified explicitly.
+    #
+    # @param [FlatMap::EmptyMapper] mapper Host empty mapper
+    # @return [Object] target for new mapper
+    def explicit_target!(mapper)
+      target = @options[:target]
+
+      if target.present?
+        case target
+        when Proc then target.call
+        when Symbol then mapper.send(target)
+        else target
+        end
+      else
+        raise Mapper::Targeting::NoTargetError.new(mapper_class)
+      end
     end
 
     # Try to use explicit target definition passed in options to fetch a
@@ -140,9 +168,11 @@ module FlatMap
     # be created should be saved. In particular, targets of <tt>:belongs_to</tt>
     # associations should be saved before target of +mapper+ is saved.
     #
-    # @param [FlatMap::Mapper] mapper
+    # @param [FlatMap::BaseMapper] mapper
     # @return [Symbol]
     def fetch_save_order(mapper)
+      return :after if mapper.is_a?(EmptyMapper)
+
       reflection = reflection_from_target(mapper.target)
       return unless reflection.present?
       reflection.macro == :belongs_to ? :before : :after
@@ -153,11 +183,16 @@ module FlatMap
     # Otherwise, assign the name of the factory to it to be able to find it
     # later on.
     #
-    # @param [FlatMap::Mapper] mapper Host mapper
+    # @param [FlatMap::BaseMapper] mapper Host mapper
     # @param [*Symbol] owner_traits List of traits to be applied to a newly created mapper
     def create(mapper, *owner_traits)
       save_order = @options[:save] || fetch_save_order(mapper) || :after
-      new_one = mapper_class.new(fetch_target(mapper), *(traits + owner_traits).uniq, &@extension)
+      all_traits = (traits + owner_traits).uniq
+
+      new_one = targeted_mount? ?
+        mapper_class.new(fetch_target_from(mapper), *all_traits, &@extension) :
+        mapper_class.new(*all_traits, &@extension)
+
       if traited?
         new_one.owner = mapper
       else

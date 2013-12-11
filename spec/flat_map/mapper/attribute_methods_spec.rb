@@ -7,7 +7,7 @@ module FlatMap
     end
   end
 
-  describe Mapper::AttributeMethods do
+  describe 'Attribute Methods' do
     let(:target){ OpenStruct.new }
     let(:mapper){ AttributeMethodsSpec::SpecMapper.new(target) }
 

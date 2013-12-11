@@ -63,7 +63,7 @@ module FlatMap
     end
   end
 
-  describe Mapper::Mounting do
+  describe 'Mounting' do
     let(:mapper){ MountingSpec::HostMapper.new(Object.new) }
     let(:mounting){ mapper.mounting(:spec_mount) }
 

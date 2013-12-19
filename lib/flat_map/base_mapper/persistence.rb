@@ -57,7 +57,7 @@ module FlatMap
     # @return [Boolean]
     def save
       before_res = save_mountings(before_save_mountings)
-      target_res = self_mountings.map{ |m| m.shallow_save }.all?
+      target_res = self_mountings.map{ |mounting| mounting.shallow_save }.all?
       after_res  = save_mountings(after_save_mountings)
 
       before_res && target_res && after_res
@@ -76,7 +76,7 @@ module FlatMap
     # @param [Array<FlatMap::BaseMapper>] mountings
     # @return [Boolean]
     def save_mountings(mountings)
-      mountings.map{ |mount| mount.save }.all?
+      mountings.map{ |mounting| mounting.save }.all?
     end
     private :save_mountings
 
@@ -100,7 +100,7 @@ module FlatMap
     # @return [Array<ActiveModel::Errors>]
     def consolidate_errors!
       mountings.map(&:errors).each do |errs|
-        errors.messages.merge!(errs.to_hash){ |k, old, new| old.concat(new) }
+        errors.messages.merge!(errs.to_hash){ |key, old, new| old.concat(new) }
       end
     end
     private :consolidate_errors!
@@ -123,14 +123,14 @@ module FlatMap
     def extract_multiparams!(params)
       all_mappings.select(&:multiparam?).each do |mapping|
         param_keys = params.keys.
-          select{ |k| k.to_s =~ /#{mapping.full_name}\(\d+[isf]\)/ }.
-          sort_by{ |k| k.to_s[/\((\d+)\w*\)/, 1].to_i }
+          select { |key| key.to_s =~ /#{mapping.full_name}\(\d+[isf]\)/ }.
+          sort_by{ |key| key.to_s[/\((\d+)\w*\)/, 1].to_i }
 
         next if param_keys.empty?
 
-        args = param_keys.inject([]) do |values, key|
-          value = params.delete key
-          type  = key[/\(\d+(\w*)\)/, 1]
+        args = param_keys.inject([]) do |values, _key|
+          value = params.delete _key
+          type  = _key[/\(\d+(\w*)\)/, 1]
           value = value.send("to_#{type}") unless type.blank?
 
           values.push value

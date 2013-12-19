@@ -35,7 +35,7 @@ module FlatMap
       super
       if target.is_a?(ActiveRecord::Base)
         if target.new_record?
-          target.instance_variable_set('@destroyed', false) 
+          target.instance_variable_set('@destroyed', false)
         else
           all_nested_mountings.each(&:use!)
         end

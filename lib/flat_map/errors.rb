@@ -42,7 +42,7 @@ module FlatMap
     # cleared after this method call.
     def empty?
       unless @preserved_errors.empty?
-        @preserved_errors.each{ |k, v| add(k, v) }
+        @preserved_errors.each{ |key, value| add(key, value) }
         @preserved_errors.clear
       end
       super

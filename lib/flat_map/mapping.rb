@@ -79,16 +79,22 @@ module FlatMap
     # @param [Hash] options
     # @return [FlatMap::Mapping::Reader::Basic]
     def fetch_reader(options)
+      options_reader = options[:reader]
+
       @reader =
-        case options[:reader]
+        case options_reader
         when Symbol, String
-          Reader::Method.new(self, options[:reader])
+          Reader::Method.new(self, options_reader)
         when Proc
-          Reader::Proc.new(self, options[:reader])
+          Reader::Proc.new(self, options_reader)
         when false
           nil
         else
-          options.key?(:format) ? Reader::Formatted.new(self, options[:format]) : Reader::Basic.new(self)
+          if options.key?(:format) then
+            Reader::Formatted.new(self, options[:format])
+          else
+            Reader::Basic.new(self)
+          end
         end
     end
     private :fetch_reader
@@ -99,12 +105,14 @@ module FlatMap
     # @param [Hash] options
     # @return [FlatMap::Mapping::Writer::Basic]
     def fetch_writer(options)
+      options_writer = options[:writer]
+
       @writer =
-        case options[:writer]
+        case options_writer
         when Symbol, String
-          Writer::Method.new(self, options[:writer])
+          Writer::Method.new(self, options_writer)
         when Proc
-          Writer::Proc.new(self, options[:writer])
+          Writer::Proc.new(self, options_writer)
         when false
           nil
         else

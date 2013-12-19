@@ -47,9 +47,13 @@ module FlatMap
   describe 'Traits' do
     describe 'trait definition' do
       it "should add a traited mapper factory to a class" do
-        TraitsSpec::EmptyMapper.should_receive(:mount).with(kind_of(Class), :trait_name => :a_trait).and_call_original
-        expect{ TraitsSpec::EmptyMapper.trait(:a_trait) }.to change{ TraitsSpec::EmptyMapper.mountings.length }.by(1)
-        trait_mapper_class = TraitsSpec::EmptyMapper.mountings.first.instance_variable_get('@identifier')
+        TraitsSpec::EmptyMapper.should_receive(:mount).
+                                with(kind_of(Class), :trait_name => :a_trait).
+                                and_call_original
+        expect{ TraitsSpec::EmptyMapper.trait(:a_trait) }.
+          to change{ TraitsSpec::EmptyMapper.mountings.length }.by(1)
+        trait_mapper_class =
+          TraitsSpec::EmptyMapper.mountings.first.instance_variable_get('@identifier')
         trait_mapper_class.name.should == 'FlatMap::TraitsSpec::EmptyMapperATraitTrait'
       end
     end

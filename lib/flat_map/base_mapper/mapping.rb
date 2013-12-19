@@ -109,7 +109,7 @@ module FlatMap
     # @param [Symbol] name
     # @return [FlatMap::Mapping]
     def mapping(name)
-      mappings.find{ |m| m.name == name }
+      mappings.find{ |mapping| mapping.name == name }
     end
 
     # Return a list of mappings associated to +self+.

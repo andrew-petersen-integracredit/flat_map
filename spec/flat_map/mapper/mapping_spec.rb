@@ -34,8 +34,12 @@ module FlatMap
         MappingSpec::EmptyMapper.should_receive(:define_mappings).once.
           with({:attr_a => :attr_a, :mapped_attr_b => :attr_b}, {:writer => false}).
           and_call_original
-        Mapping::Factory.should_receive(:new).with(:attr_a, :attr_a, :writer => false).and_call_original
-        Mapping::Factory.should_receive(:new).with(:mapped_attr_b, :attr_b, :writer => false).and_call_original
+        Mapping::Factory.should_receive(:new).
+                         with(:attr_a, :attr_a, :writer => false).
+                         and_call_original
+        Mapping::Factory.should_receive(:new).
+                         with(:mapped_attr_b, :attr_b, :writer => false).
+                         and_call_original
 
         MappingSpec::EmptyMapper.class_eval do
           map :attr_a, :mapped_attr_b => :attr_b, :writer => false

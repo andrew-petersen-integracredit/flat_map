@@ -11,6 +11,12 @@ group :development do
   gem 'gemfury', :require => false
 end
 
+group :development, :test do
+  # code metrics:
+  gem "metric_fu"
+end
+
 group :test do
-  gem 'simplecov', :require => false
+  gem 'simplecov'          , :require => false
+  gem 'simplecov-rcov-text', :require => false
 end

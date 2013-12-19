@@ -25,7 +25,7 @@ module FlatMap
     # Return the name of the mapper being defined by the factory.
     # Return +nil+ for the traited factory.
     #
-    # @return [Symbol, nil] 
+    # @return [Symbol, nil]
     def name
       traited? ? nil : @identifier
     end
@@ -72,7 +72,9 @@ module FlatMap
 
       return owner_target if traited?
 
-      explicit_target(owner_target) || target_from_association(owner_target) || target_from_name(owner_target)
+      explicit_target(owner_target)         ||
+      target_from_association(owner_target) ||
+      target_from_name(owner_target)
     end
 
     # When creating mappers mounted on top of EmptyMapper, target cannot be implicitly
@@ -85,7 +87,7 @@ module FlatMap
 
       if target.present?
         case target
-        when Proc then target.call
+        when Proc   then target.call
         when Symbol then mapper.send(target)
         else target
         end
@@ -135,13 +137,15 @@ module FlatMap
       reflection = reflection_from_target(owner_target)
       return unless reflection.present?
 
+      reflection_macro = reflection.macro
       case
-      when reflection.macro == :has_one && reflection.options[:is_current]
+      when reflection_macro == :has_one && reflection.options[:is_current]
         owner_target.send("effective_#{name}")
-      when reflection.macro == :has_one || reflection.macro == :belongs_to
+      when reflection_macro == :has_one || reflection_macro == :belongs_to
         owner_target.send(name) || owner_target.send("build_#{name}")
-      when reflection.macro == :has_many
+      when reflection_macro == :has_many
         owner_target.association(reflection.name).build
+      else # nil
       end
     end
 
@@ -152,8 +156,9 @@ module FlatMap
     # @return [ActiveRecord::Reflection::AssociationReflection, nil]
     def reflection_from_target(target)
       return unless name.present? && target.is_a?(ActiveRecord::Base)
-      reflection = target.class.reflect_on_association(name)
-      reflection || target.class.reflect_on_association(name.to_s.pluralize.to_sym)
+      target_class = target.class
+      reflection   = target_class.reflect_on_association(name)
+      reflection  || target_class.reflect_on_association(name.to_s.pluralize.to_sym)
     end
 
     # Send the name of the mounting to the target of the host mapper, and use
@@ -189,15 +194,18 @@ module FlatMap
       save_order = @options[:save] || fetch_save_order(mapper) || :after
       all_traits = (traits + owner_traits).uniq
 
-      new_one = targeted_mount? ?
-        mapper_class.new(fetch_target_from(mapper), *all_traits, &@extension) :
-        mapper_class.new(*all_traits, &@extension)
+      new_one =
+        if targeted_mount? then
+          mapper_class.new(fetch_target_from(mapper), *all_traits, &@extension)
+        else
+          mapper_class.new(*all_traits, &@extension)
+        end
 
       if traited?
         new_one.owner = mapper
       else
-        new_one.host = mapper
-        new_one.name = @identifier
+        new_one.host       = mapper
+        new_one.name       = @identifier
         new_one.save_order = save_order
 
         if (suffix = @options[:suffix] || mapper.suffix).present?

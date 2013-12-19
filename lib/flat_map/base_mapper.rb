@@ -34,7 +34,6 @@ module FlatMap
     # Note: those class attributes are defined in {Mapping}
     # and {Mounting} modules.
     def self.inherited(subclass)
-      return unless self < FlatMap::Mapper
       subclass.mappings  = mappings.dup
       subclass.mountings = mountings.dup
     end

@@ -70,14 +70,14 @@ module FlatMap
     #
     # @return [Array<FlatMap::BaseMapper>]
     def before_save_mountings
-      nearest_mountings.select{ |m| m.save_order == :before }
+      nearest_mountings.select{ |mount| mount.save_order == :before }
     end
 
     # Return list of mappings to be saved after target of +self+ was saved
     #
     # @return [Array<FlatMap::BaseMapper>]
     def after_save_mountings
-      nearest_mountings.reject{ |m| m.save_order == :before }
+      nearest_mountings.reject{ |mount| mount.save_order == :before }
     end
 
     # Return all mountings that are mouted on +self+ directly or through
@@ -85,26 +85,24 @@ module FlatMap
     #
     # @return [Array<FlatMap::BaseMapper>]
     def nearest_mountings
-      mountings.map{ |m| m.owned? ? m.nearest_mountings : m }.flatten
+      mountings.map{ |mount| mount.owned? ? mount.nearest_mountings : mount }.flatten
     end
 
     # Return a list of all mountings (mapper objects) associated with +self+.
     #
     # Overridden in {Traits}.
     #
-    # @param [Array<FlatMap::BaseMapper::Factory>] factories list of mapper factories
-    #   to mount. Defaults to the ones defined on class.
     # @return [Array<FlatMap::BaseMapper>]
-    def mountings(factories = self.class.mountings)
-      @mountings ||= factories.map{ |factory| factory.create(self) }
+    def mountings
+      @mountings ||= self.class.mountings.map{ |factory| factory.create(self) }
     end
 
     # Return a mapping with the name that corresponds to passed +mounting_name+,
     # if it exists.
     #
     # @return [FlatMap::Mapping, nil]
-    def mounting(mounting_name, deep = true)
-      list = deep ? all_mountings : mountings
+    def mounting(mounting_name, is_deep = true)
+      list = is_deep ? all_mountings : mountings
       list.find{ |mount| mount.name == mounting_name }
     end
 
@@ -123,7 +121,7 @@ module FlatMap
     #
     # @return [Array<FlatMap::BaseMapper>]
     def all_nested_mountings
-      mountings.dup.concat(mountings.map{ |m| m.send(:all_nested_mountings) }).flatten
+      mountings.dup.concat(mountings.map{ |mount| mount.send(:all_nested_mountings) }).flatten
     end
     protected :all_nested_mountings
 
@@ -146,7 +144,7 @@ module FlatMap
     #
     # @return [Array<FlatMap::Mapping>]
     def all_nested_mappings
-      (mappings + mountings.map{ |m| m.send(:all_nested_mappings) }).flatten
+      (mappings + mountings.map{ |mount| mount.send(:all_nested_mappings) }).flatten
     end
     protected :all_nested_mappings
 
@@ -157,13 +155,14 @@ module FlatMap
     # something like [mapper].flatten. And we DO want default behavior
     # for handling this missing method.
     def method_missing(name, *args, &block)
-      return super if name == :to_ary || FlatMap::BaseMapper.protected_instance_methods.include?(name)
+      return super if name == :to_ary ||
+                      FlatMap::BaseMapper.protected_instance_methods.include?(name)
 
       return self[name] if mapping(name).present?
 
-      mounting = all_mountings.find{ |m| m.respond_to?(name) }
-      return super if mounting.nil?
-      mounting.send(name, *args, &block)
+      mount = all_mountings.find{ |_mount| _mount.respond_to?(name) }
+      return super if mount.nil?
+      mount.send(name, *args, &block)
     end
   end
 end

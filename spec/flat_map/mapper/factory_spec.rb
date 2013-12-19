@@ -11,7 +11,7 @@ module FlatMap
 
     context 'when used for a trait' do
       subject{ trait_factory }
-      
+
       it{ should be_traited }
       its(:name){ should be_nil }
       its(:trait_name){ should == :a_trait }
@@ -37,7 +37,10 @@ module FlatMap
         end
 
         it "should use options if specified" do
-          factory = BaseMapper::Factory.new(:spec_mount, :mapper_class_name => 'FlatMap::BaseMapper::Factory::SpecMountMapper')
+          factory = BaseMapper::Factory.new(
+                      :spec_mount,
+                      :mapper_class_name => 'FlatMap::BaseMapper::Factory::SpecMountMapper'
+                    )
           factory.mapper_class.should == ::FlatMap::BaseMapper::Factory::SpecMountMapper
         end
       end
@@ -63,34 +66,52 @@ module FlatMap
         context 'target from association' do
           before{ target.stub(:kind_of?).with(ActiveRecord::Base).and_return(true) }
 
-          let(:has_one_current_reflection){ double('reflection', :macro => :has_one, :options => {:is_current => true}) }
-          let(:has_one_reflection){ double('reflection', :macro => :has_one, :options => {}) }
-          let(:belongs_to_reflection){ double('reflection', :macro => :belongs_to) }
-          let(:has_many_reflection){ double('reflection', :macro => :has_many, :name => :spec_mounts) }
+          let(:has_one_current_reflection) {
+            double('reflection', :macro => :has_one, :options => {:is_current => true})
+          }
+          let(:has_one_reflection) {
+            double('reflection', :macro => :has_one, :options => {})
+          }
+          let(:belongs_to_reflection) {
+            double('reflection', :macro => :belongs_to)
+          }
+          let(:has_many_reflection) {
+            double('reflection', :macro => :has_many, :name => :spec_mounts)
+          }
 
           it "should refer to effective name for has_one_current association" do
             # Note: has_one_current is not part of Rails
-            mount_factory.should_receive(:reflection_from_target).with(target).and_return(has_one_current_reflection)
+            mount_factory.should_receive(:reflection_from_target).
+                          with(target).
+                          and_return(has_one_current_reflection)
             target.should_receive(:effective_spec_mount).and_return(other_target)
             mount_factory.fetch_target_from(mapper).should == other_target
           end
 
-          it "should refer to existing association object if possible, and build it if it is absent for :has_one" do
-            mount_factory.should_receive(:reflection_from_target).with(target).and_return(has_one_reflection)
+          it "should refer to existing association object if possible, " \
+             "and build it if it is absent for :has_one" do
+            mount_factory.should_receive(:reflection_from_target).
+                          with(target).
+                          and_return(has_one_reflection)
             target.should_receive(:spec_mount).and_return(nil)
             target.should_receive(:build_spec_mount).and_return(other_target)
             mount_factory.fetch_target_from(mapper).should == other_target
           end
 
-          it "should refer to existing association object if possible, and build it if it is absent for :belongs_to" do
-            mount_factory.should_receive(:reflection_from_target).with(target).and_return(belongs_to_reflection)
+          it "should refer to existing association object if possible, " \
+             "and build it if it is absent for :belongs_to" do
+            mount_factory.should_receive(:reflection_from_target).
+                          with(target).
+                          and_return(belongs_to_reflection)
             target.should_receive(:spec_mount).and_return(nil)
             target.should_receive(:build_spec_mount).and_return(other_target)
             mount_factory.fetch_target_from(mapper).should == other_target
           end
 
           it "should always build a new record for :has_many association" do
-            mount_factory.should_receive(:reflection_from_target).with(target).and_return(has_many_reflection)
+            mount_factory.should_receive(:reflection_from_target).
+                          with(target).
+                          and_return(has_many_reflection)
             target.should_receive(:association).with(:spec_mounts)
             target.stub_chain(:association, :build).and_return(other_target)
             mount_factory.fetch_target_from(mapper).should == other_target
@@ -100,13 +121,19 @@ module FlatMap
             before{ target.stub(:is_a?).with(ActiveRecord::Base).and_return(true) }
 
             it 'should first refer to singular association' do
-              target.stub_chain(:class, :reflect_on_association).with.with(:spec_mount).and_return(has_one_reflection)
+              target.stub_chain(:class, :reflect_on_association).
+                     with(:spec_mount).
+                     and_return(has_one_reflection)
               mount_factory.reflection_from_target(target).should == has_one_reflection
             end
 
             it 'should use collection association if singular does not exist' do
-              target.stub_chain(:class, :reflect_on_association).with.with(:spec_mount).and_return(nil)
-              target.stub_chain(:class, :reflect_on_association).with.with(:spec_mounts).and_return(has_many_reflection)
+              target.stub_chain(:class, :reflect_on_association).
+                     with(:spec_mount).
+                     and_return(nil)
+              target.stub_chain(:class, :reflect_on_association).
+                     with(:spec_mounts).
+                     and_return(has_many_reflection)
               mount_factory.reflection_from_target(target).should == has_many_reflection
             end
           end
@@ -146,14 +173,16 @@ module FlatMap
           end
 
           it 'should combine traits' do
-            mount_class.should_receive(:new).with(other_target, :used_traits, :another_trait).and_call_original
+            mount_class.should_receive(:new).
+                        with(other_target, :used_traits, :another_trait).
+                        and_call_original
             factory.create(mapper, :another_trait)
           end
 
           it 'should properly set properties' do
             new_one = factory.create(mapper)
-            new_one.host.should == mapper
-            new_one.name.should == :spec_mount
+            new_one.host      .should == mapper
+            new_one.name      .should == :spec_mount
             new_one.save_order.should == :after
             new_one.suffix.should be_nil
           end
@@ -163,7 +192,7 @@ module FlatMap
 
             it "should adjust properties with suffix" do
               new_one = factory.create(mapper)
-              new_one.name.should == :spec_mount_foo
+              new_one.name  .should == :spec_mount_foo
               new_one.suffix.should == :foo
             end
           end
@@ -173,7 +202,9 @@ module FlatMap
             let(:factory){ BaseMapper::Factory.new(:spec_mount, &extension) }
 
             it "should pass it to mapper initialization" do
-              mount_class.should_receive(:new).with(other_target, &extension).and_call_original
+              mount_class.should_receive(:new).
+                          with(other_target, &extension).
+                          and_call_original
               new_one = factory.create(mapper)
             end
           end
@@ -189,12 +220,14 @@ module FlatMap
             end
 
             it 'should be :before for belongs_to association' do
-              mount_factory.stub(:reflection_from_target).and_return(double('reflection', :macro => :belongs_to))
+              mount_factory.stub(:reflection_from_target).
+                            and_return(double('reflection', :macro => :belongs_to))
               factory.fetch_save_order(mapper).should == :before
             end
 
             it 'should be :after for other cases' do
-              mount_factory.stub(:reflection_from_target).and_return(double('reflection', :macro => :has_one))
+              mount_factory.stub(:reflection_from_target).
+                            and_return(double('reflection', :macro => :has_one))
               factory.fetch_save_order(mapper).should == :after
             end
           end

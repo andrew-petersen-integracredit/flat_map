@@ -28,13 +28,15 @@ module FlatMap
     #
     # @return [Array<FlatMap::BaseMapper>]
     def mountings
-      mountings = self.class.mountings.
-                             reject{ |factory|
-                               factory.traited? &&
-                               !factory.required_for_any_trait?(traits)
-                             }
-      mountings.concat(singleton_class.mountings)
-      super(mountings)
+      @mountings ||= begin
+        mountings = self.class.mountings.
+                               reject{ |factory|
+                                 factory.traited? &&
+                                 !factory.required_for_any_trait?(traits)
+                               }
+        mountings.concat(singleton_class.mountings)
+        mountings.map{ |factory| factory.create(self, *traits) }
+      end
     end
 
     # Return a list of all mountings that represent full picture of +self+, i.e.
@@ -42,7 +44,7 @@ module FlatMap
     #
     # @return [Array<FlatMap::BaseMapper>]
     def self_mountings
-      mountings.select(&:owned?).map{ |m| m.self_mountings }.flatten.concat [self]
+      mountings.select(&:owned?).map{ |mount| mount.self_mountings }.flatten.concat [self]
     end
 
     # Try to find trait mapper with name that corresponds to +trait_name+
@@ -66,7 +68,7 @@ module FlatMap
     #
     # @return [Array<FlatMap::BaseMapper>]
     def trait_mountings
-      result = mountings.select{ |m| m.owned? }
+      result = mountings.select{ |mount| mount.owned? }
       # mapper extension has more priority then traits, and
       # has to be processed first.
       result.unshift(result.pop) if result.length > 1 && result[-1].extension?
@@ -78,7 +80,7 @@ module FlatMap
     #
     # @return [Array<FlatMap::BaseMapper>]
     def mapper_mountings
-      mountings.select{ |m| !m.owned? }
+      mountings.select{ |mount| !mount.owned? }
     end
     protected :mapper_mountings
 

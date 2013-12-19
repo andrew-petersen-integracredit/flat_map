@@ -69,7 +69,9 @@ module FlatMap
 
     context 'defining mountings' do
       it "should use Factory for defining mappings" do
-        Mapper::Factory.should_receive(:new).with(:foo, :mapper_class_name => 'FooMapper').and_call_original
+        Mapper::Factory.should_receive(:new).
+                        with(:foo, :mapper_class_name => 'FooMapper').
+                        and_call_original
 
         expect{ MountingSpec::EmptyMapper.mount(:foo, :mapper_class_name => 'FooMapper') }.
           to change{ MountingSpec::EmptyMapper.mountings.length }.from(0).to(1)

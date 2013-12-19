@@ -33,17 +33,21 @@ module FlatMap
       end
 
       it 'should detect target_class from nearest ancestor when inherited' do
-        ModelMethodsSpec::InheritedClassMapper.target_class.should == ModelMethodsSpec::TargetClass
+        ModelMethodsSpec::InheritedClassMapper.target_class.
+                                               should == ModelMethodsSpec::TargetClass
       end
 
       it 'should use explicit class name if specified' do
-        ModelMethodsSpec::ExplicitNameMapper.target_class.should == ModelMethodsSpec::OtherTargetClass
+        ModelMethodsSpec::ExplicitNameMapper.target_class.
+                                             should == ModelMethodsSpec::OtherTargetClass
       end
     end
 
     describe '.build' do
       it 'should use target class to build a new object for mapper' do
-        ModelMethodsSpec::TargetClassMapper.should_receive(:new).with(kind_of(ModelMethodsSpec::TargetClass), :used_trait)
+        ModelMethodsSpec::TargetClassMapper.
+          should_receive(:new).
+          with(kind_of(ModelMethodsSpec::TargetClass), :used_trait)
         ModelMethodsSpec::TargetClassMapper.build(:used_trait)
       end
     end

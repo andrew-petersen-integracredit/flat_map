@@ -71,7 +71,7 @@ module FlatMap
       #
       # @return [String]
       def default_target_class_name
-        ancestor_classes = ancestors.select{ |a| a.is_a? Class }
+        ancestor_classes = ancestors.select{ |ancestor| ancestor.is_a? Class }
         base_mapper_index = ancestor_classes.index(::FlatMap::Mapper)
         ancestor_classes[base_mapper_index - 1].name[/^([\w:]+)Mapper.*$/, 1]
       end

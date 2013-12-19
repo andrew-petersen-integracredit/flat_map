@@ -18,6 +18,12 @@ module FlatMap
         def method_one
           'one'
         end
+
+        trait :trait_one_nested do
+          def method_one_nested
+            'nested_one'
+          end
+        end
       end
 
       trait :trait_two do
@@ -105,6 +111,19 @@ module FlatMap
       specify 'traits should be able to call methods of each other' do
         mapper = TraitsSpec::HostMapper.new(target, :trait_one, :trait_two)
         mapper.trait(:trait_two).method_two.should == 'one'
+      end
+
+      describe 'trait nesting' do
+        let(:mapper){ TraitsSpec::HostMapper.new(target, :trait_one_nested) }
+
+        it 'should still be able to have top-level trait definitions' do
+          mapper.mounting(:spec_mount).should be_present
+          mapper.method_one.should == 'one'
+        end
+
+        it 'should have new definitions' do
+          mapper.method_one_nested.should == 'nested_one'
+        end
       end
 
       describe 'extension trait' do

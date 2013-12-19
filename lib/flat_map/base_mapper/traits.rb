@@ -28,13 +28,15 @@ module FlatMap
     #
     # @return [Array<FlatMap::BaseMapper>]
     def mountings
-      mountings = self.class.mountings.
-                             reject{ |factory|
-                               factory.traited? &&
-                               !factory.required_for_any_trait?(traits)
-                             }
-      mountings.concat(singleton_class.mountings)
-      super(mountings)
+      @mountings ||= begin
+        mountings = self.class.mountings.
+                               reject{ |factory|
+                                 factory.traited? &&
+                                 !factory.required_for_any_trait?(traits)
+                               }
+        mountings.concat(singleton_class.mountings)
+        mountings.map{ |factory| factory.create(self, *traits) }
+      end
     end
 
     # Return a list of all mountings that represent full picture of +self+, i.e.

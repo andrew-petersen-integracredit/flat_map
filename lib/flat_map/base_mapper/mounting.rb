@@ -92,11 +92,9 @@ module FlatMap
     #
     # Overridden in {Traits}.
     #
-    # @param [Array<FlatMap::BaseMapper::Factory>] factories list of mapper factories
-    #   to mount. Defaults to the ones defined on class.
     # @return [Array<FlatMap::BaseMapper>]
-    def mountings(factories = self.class.mountings)
-      @mountings ||= factories.map{ |factory| factory.create(self) }
+    def mountings
+      @mountings ||= self.class.mountings.map{ |factory| factory.create(self) }
     end
 
     # Return a mapping with the name that corresponds to passed +mounting_name+,

@@ -57,7 +57,7 @@ module FlatMap
     # @return [Boolean]
     def save
       before_res = save_mountings(before_save_mountings)
-      target_res = self_mountings.map{ |mounting| mounting.shallow_save }.all?
+      target_res = self_mountings.map{ |mount| mount.shallow_save }.all?
       after_res  = save_mountings(after_save_mountings)
 
       before_res && target_res && after_res
@@ -76,7 +76,7 @@ module FlatMap
     # @param [Array<FlatMap::BaseMapper>] mountings
     # @return [Boolean]
     def save_mountings(mountings)
-      mountings.map{ |mounting| mounting.save }.all?
+      mountings.map{ |mount| mount.save }.all?
     end
     private :save_mountings
 

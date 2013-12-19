@@ -44,7 +44,7 @@ module FlatMap
     #
     # @return [Array<FlatMap::BaseMapper>]
     def self_mountings
-      mountings.select(&:owned?).map{ |mounting| mounting.self_mountings }.flatten.concat [self]
+      mountings.select(&:owned?).map{ |mount| mount.self_mountings }.flatten.concat [self]
     end
 
     # Try to find trait mapper with name that corresponds to +trait_name+
@@ -54,7 +54,7 @@ module FlatMap
     # @param [Symbol] trait_name
     # @return [FlatMap::BaseMapper, nil]
     def trait(trait_name)
-      self_mountings.find{ |mounting| mounting.class.name.underscore =~ /#{trait_name}_trait$/ }
+      self_mountings.find{ |mount| mount.class.name.underscore =~ /#{trait_name}_trait$/ }
     end
 
     # Return :extension trait, if present
@@ -68,7 +68,7 @@ module FlatMap
     #
     # @return [Array<FlatMap::BaseMapper>]
     def trait_mountings
-      result = mountings.select{ |mounting| mounting.owned? }
+      result = mountings.select{ |mount| mount.owned? }
       # mapper extension has more priority then traits, and
       # has to be processed first.
       result.unshift(result.pop) if result.length > 1 && result[-1].extension?
@@ -80,7 +80,7 @@ module FlatMap
     #
     # @return [Array<FlatMap::BaseMapper>]
     def mapper_mountings
-      mountings.select{ |mounting| !mounting.owned? }
+      mountings.select{ |mount| !mount.owned? }
     end
     protected :mapper_mountings
 

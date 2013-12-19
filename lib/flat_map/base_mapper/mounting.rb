@@ -70,14 +70,14 @@ module FlatMap
     #
     # @return [Array<FlatMap::BaseMapper>]
     def before_save_mountings
-      nearest_mountings.select{ |mounting| mounting.save_order == :before }
+      nearest_mountings.select{ |mount| mount.save_order == :before }
     end
 
     # Return list of mappings to be saved after target of +self+ was saved
     #
     # @return [Array<FlatMap::BaseMapper>]
     def after_save_mountings
-      nearest_mountings.reject{ |mounting| mounting.save_order == :before }
+      nearest_mountings.reject{ |mount| mount.save_order == :before }
     end
 
     # Return all mountings that are mouted on +self+ directly or through
@@ -85,7 +85,7 @@ module FlatMap
     #
     # @return [Array<FlatMap::BaseMapper>]
     def nearest_mountings
-      mountings.map{ |mounting| mounting.owned? ? mounting.nearest_mountings : mounting }.flatten
+      mountings.map{ |mount| mount.owned? ? mount.nearest_mountings : mount }.flatten
     end
 
     # Return a list of all mountings (mapper objects) associated with +self+.
@@ -121,7 +121,7 @@ module FlatMap
     #
     # @return [Array<FlatMap::BaseMapper>]
     def all_nested_mountings
-      mountings.dup.concat(mountings.map{ |mounting| mounting.send(:all_nested_mountings) }).flatten
+      mountings.dup.concat(mountings.map{ |mount| mount.send(:all_nested_mountings) }).flatten
     end
     protected :all_nested_mountings
 
@@ -144,7 +144,7 @@ module FlatMap
     #
     # @return [Array<FlatMap::Mapping>]
     def all_nested_mappings
-      (mappings + mountings.map{ |mounting| mounting.send(:all_nested_mappings) }).flatten
+      (mappings + mountings.map{ |mount| mount.send(:all_nested_mappings) }).flatten
     end
     protected :all_nested_mappings
 
@@ -160,9 +160,9 @@ module FlatMap
 
       return self[name] if mapping(name).present?
 
-      mounting = all_mountings.find{ |_mounting| _mounting.respond_to?(name) }
-      return super if mounting.nil?
-      mounting.send(name, *args, &block)
+      mount = all_mountings.find{ |_mount| _mount.respond_to?(name) }
+      return super if mount.nil?
+      mount.send(name, *args, &block)
     end
   end
 end

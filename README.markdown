@@ -1,7 +1,7 @@
 # FlatMap
 
 FlatMap is a flexible tool for mapping a complex, deeply nested object graph
-into a mapper object with all mapepd attributes accessible in a plain way.
+into a mapper object with all mapped attributes accessible in a plain way.
 
 
 ## Usage
@@ -202,6 +202,7 @@ rake spec
 
 * [Artem Kuzko](https://github.com/akuzko)
 * [Zachary Belzer](https://github.com/zbelzer)
+* [Potapov Sergey](https://github.com/greyblake)
 
 ## Copyright
 

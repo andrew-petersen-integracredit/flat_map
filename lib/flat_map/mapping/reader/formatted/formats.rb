@@ -4,7 +4,7 @@ module FlatMap
     # for post-processing.
     module Formatted::Formats
       if defined? I18n
-        # Pass +value+ to <tt>I18n::l</tt> method
+        # Pass +value+ to <tt>I18n::l</tt> method.
         def i18n_l(value)
           I18n::l(value) if value
         end
@@ -14,7 +14,7 @@ module FlatMap
         # Return the specified +property+ of a +value+ which
         # is supposed to be an +enum+ record. By default,
         # uses <tt>:name</tt>. However, <tt>:description</tt>
-        # might be also useful for UI purposes
+        # might be also useful for UI purposes.
         #
         # @param [Object] value
         # @param [Symbol] property

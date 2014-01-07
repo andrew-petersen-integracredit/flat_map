@@ -6,7 +6,7 @@ Gem::Specification.new do |s|
   s.name        = "flat_map"
   s.version     = FlatMap::VERSION
   s.authors     = ["TMX Credit", "Artem Kuzko", "Zachary Belzer", "Sergey Potapov"]
-  s.email       = ["rubygems@tmxcredit.com", "akuzko@sphereconsultinginc.com"]
+  s.email       = ["rubygems@tmxcredit.com", "akuzko@sphereconsultinginc.com", "zbelzer@gmail.com", "blake131313@gmail.com"]
   s.homepage    = "https://github.com/TMXCredit/flat_map"
   s.licenses    = ["LICENSE"]
   s.summary     = %q{Deep object graph to a plain properties mapper}

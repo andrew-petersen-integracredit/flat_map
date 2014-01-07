@@ -19,8 +19,8 @@ module FlatMap
       end
 
       mappings    = all_mappings
-      valid_names = mappings.map{ |mapping|
-                      mapping_full_name = mapping.full_name
+      valid_names = mappings.map{ |_mapping|
+                      mapping_full_name = _mapping.full_name
                       [ mapping_full_name,
                         "#{mapping_full_name}=".to_sym ]
                     }.flatten
@@ -39,12 +39,12 @@ module FlatMap
     # @return [Module] module with method definitions
     def attribute_methods(mappings)
       Module.new do
-        mappings.each do |mapping|
-          mapping_full_name = mapping.full_name
-          define_method(mapping_full_name){ |*args| mapping.read(*args) }
+        mappings.each do |_mapping|
+          mapping_full_name = _mapping.full_name
+          define_method(mapping_full_name){ |*args| _mapping.read(*args) }
 
           define_method("#{mapping_full_name}=") do |value|
-            mapping.write(value)
+            _mapping.write(value)
           end
         end
       end

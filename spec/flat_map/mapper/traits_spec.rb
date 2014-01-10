@@ -42,6 +42,10 @@ module FlatMap
     def self.mount_target
       @mount_target ||= MountClass.new('c', 'd')
     end
+
+    def self.reset_mount_target
+      @mount_target = nil
+    end
   end
 
   describe 'Traits' do
@@ -63,6 +67,8 @@ module FlatMap
       let(:mount_target){ TraitsSpec.mount_target }
       let(:mapper){ TraitsSpec::HostMapper.new(target, :trait_one) }
       let(:trait){ mapper.trait(:trait_one) }
+
+      after{ TraitsSpec.reset_mount_target }
 
       describe 'trait properties' do
         subject{ trait }

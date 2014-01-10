@@ -1,5 +1,7 @@
 # FlatMap
 
+[![Build Status](https://secure.travis-ci.org/TMXCredit/flat_map.png)](http://travis-ci.org/TMXCredit/flat_map)
+
 FlatMap is a flexible tool for mapping a complex, deeply nested object graph
 into a mapper object with all mapped attributes accessible in a plain way.
 
@@ -173,7 +175,7 @@ method calls without performing any other operations. For example:
 
       set_callback :validate, :before, :ignore_new_product
 
-      def ignore_new_bank_account
+      def ignore_new_product
         mounting(:product).skip! if product_selected?
       end
 

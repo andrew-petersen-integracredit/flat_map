@@ -39,6 +39,10 @@ module FlatMap
     def self.mount_target
       @mount_target ||= MountTarget.new('a', 'b')
     end
+
+    def self.reset_mount_target
+      @mount_target = nil
+    end
   end
 
   module MountingSuffixSpec
@@ -66,6 +70,8 @@ module FlatMap
   describe 'Mounting' do
     let(:mapper){ MountingSpec::HostMapper.new(Object.new) }
     let(:mounting){ mapper.mounting(:spec_mount) }
+
+    after{ MountingSpec.reset_mount_target }
 
     context 'defining mountings' do
       it "should use Factory for defining mappings" do

@@ -24,7 +24,6 @@ Gem::Specification.new do |s|
   s.add_dependency(%q<activesupport>, ["~> 3.2"])
   s.add_dependency(%q<activerecord>, ["~> 3.2"])
   s.add_dependency(%q<yard>, [">= 0"])
-  s.add_dependency(%q<gemfury>, [">= 0"])
 
   s.add_development_dependency "rspec"
   s.add_development_dependency "rake"

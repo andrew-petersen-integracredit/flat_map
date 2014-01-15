@@ -1,18 +1,37 @@
 module FlatMap
-  # This module provides persistence functionality for mappers. Note
-  # that term of persistence here does not imply storing information
-  # in database or other place. This module provides methods for
-  # saving operation as a work flow of applying parameters to mapper
-  # and all of its mounted mappers in a right way, running callbacks,
-  # etc.
-  #
-  # See {Mapper::Targeting} for a place where mapper targets are
-  # actually get persisted / updated.
+  # This module provides some integration between mapper and its target,
+  # which is usually an ActiveRecord model, as well as some integration
+  # between mapper and Rails forms.
   #
   # In particular, validation and save methods are defined here. And
   # the <tt>save</tt> method itself is defined as a callback. Also, Rails
   # multiparam attributes extraction is defined within this module.
-  module BaseMapper::Persistence
+  module OpenMapper::Persistence
+    extend ActiveSupport::Concern
+
+    included do
+      define_callbacks :save
+    end
+
+    # ModelMethods class macros
+    module ClassMethods
+      # Create a new mapper object wrapped around new instance of its
+      # +target_class+, with a list of passed +traits+ applied to it.
+      #
+      # @param [*Symbol] traits
+      # @return [FlatMap::OpenMapper] mapper
+      def build(*traits, &block)
+        new(target_class.new, *traits, &block)
+      end
+
+      # Default target class for OpenMapper is OpenStruct.
+      #
+      # @return [Class] class
+      def target_class
+        OpenStruct
+      end
+    end
+
     # Write a passed set of +params+. Then try to save the model if +self+
     # passes validation. Saving is performed in a transaction.
     #
@@ -63,6 +82,13 @@ module FlatMap
       before_res && target_res && after_res
     end
 
+    # Return +true+ since OpenStruct is always 'saved'.
+    #
+    # @return [true]
+    def save_target
+      true
+    end
+
     # Perform target save with callbacks call
     #
     # @return [Boolean]
@@ -70,10 +96,17 @@ module FlatMap
       run_callbacks(:save){ save_target }
     end
 
+    # Return +true+ if target was updated.
+    #
+    # @return [Boolean]
+    def persisted?
+      target != OpenStruct.new
+    end
+
     # Send <tt>:save</tt> method to all mountings in list. Will return +true+
     # only if all savings are positive.
     #
-    # @param [Array<FlatMap::BaseMapper>] mountings
+    # @param [Array<FlatMap::OpenMapper>] mountings
     # @return [Boolean]
     def save_mountings(mountings)
       mountings.map{ |mount| mount.save }.all?
@@ -128,9 +161,9 @@ module FlatMap
 
         next if param_keys.empty?
 
-        args = param_keys.inject([]) do |values, _key|
-          value = params.delete _key
-          type  = _key[/\(\d+(\w*)\)/, 1]
+        args = param_keys.inject([]) do |values, key|
+          value = params.delete key
+          type  = key[/\(\d+(\w*)\)/, 1]
           value = value.send("to_#{type}") unless type.blank?
 
           values.push value

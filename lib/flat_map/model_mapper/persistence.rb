@@ -1,23 +1,10 @@
 module FlatMap
-  # This module provides some integration between mapper and its target,
-  # which is usually an ActiveRecord model, as well as some integration
-  # between mapper and Rails forms.
-  module Mapper::Targeting
-    # Raised when mapper is initialized with no target defined
-    class NoTargetError < ArgumentError
-      # Initializes exception with a name of mapper class.
-      #
-      # @param [Class] mapper_class class of mapper being initialized
-      def initialize(mapper_class)
-        super("Target object is required to initialize #{mapper_class.name}")
-      end
-    end
-
+  # This module enhances and modifies original FlatMap::OpenMapper::Persistance
+  # functionality for ActiveRecord models as targets.
+  module ModelMapper::Persistence
     extend ActiveSupport::Concern
 
     included do
-      define_callbacks :save
-
       # Writer of the target class name. Allows manual control over target
       # class of the mapper, for example:
       #
@@ -29,15 +16,6 @@ module FlatMap
 
     # ModelMethods class macros
     module ClassMethods
-      # Create a new mapper object wrapped around new instance of its
-      # +target_class+, with a list of passed +traits+ applied to it.
-      #
-      # @param [*Symbol] traits
-      # @return [FlatMap::Mapper] mapper
-      def build(*traits, &block)
-        new(target_class.new, *traits, &block)
-      end
-
       # Find a record of the +target_class+ by +id+ and use it as a
       # target for a new mapper, with a list of passed +traits+ applied
       # to it.
@@ -71,8 +49,8 @@ module FlatMap
       #
       # @return [String]
       def default_target_class_name
-        ancestor_classes = ancestors.select{ |ancestor| ancestor.is_a? Class }
-        base_mapper_index = ancestor_classes.index(::FlatMap::Mapper)
+        ancestor_classes  = ancestors.select{ |ancestor| ancestor.is_a? Class }
+        base_mapper_index = ancestor_classes.index(::FlatMap::ModelMapper)
         ancestor_classes[base_mapper_index - 1].name[/^([\w:]+)Mapper.*$/, 1]
       end
     end

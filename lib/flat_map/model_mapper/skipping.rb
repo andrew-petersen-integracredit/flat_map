@@ -1,8 +1,8 @@
 module FlatMap
-  # This helper module slightly enhances functionality of the
-  # {BaseMapper::Skipping} module for most commonly used +ActiveRecord+ targets.
-  # This is done to improve modularity of the {FlatMap} mappers.
-  module Mapper::Skipping
+  # This helper module slightly enhances ofunctionality of the
+  # {FlatMap::OpenMapper::Skipping} module for most commonly
+  # used +ActiveRecord+ targets.
+  module ModelMapper::Skipping
     # Extend original #skip! method for Rails-models-based targets
     #
     # Note that this will mark the target record as

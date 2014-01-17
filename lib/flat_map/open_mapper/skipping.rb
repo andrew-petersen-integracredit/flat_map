@@ -1,7 +1,11 @@
 module FlatMap
   # This helper module provides helper functionality that allow to
   # exclude specific mapper from a processing chain.
-  module BaseMapper::Skipping
+  module OpenMapper::Skipping
+    extend ActiveSupport::Autoload
+
+    autoload :ActiveRecord
+
     # Mark self as skipped, i.e. it will not be subject of
     # validation and saving chain.
     #
@@ -25,7 +29,7 @@ module FlatMap
       !!@_skip_processing
     end
 
-    # Override {FlatMap::BaseMapper::Persistence#valid?} to
+    # Override {FlatMap::OpenMapper::Persistence#valid?} to
     # force it to return +true+ if +self+ is marked for skipping.
     #
     # @param [Symbol] context useless context parameter to make it compatible with
@@ -36,7 +40,7 @@ module FlatMap
       skipped? || super
     end
 
-    # Override {FlatMap::BaseMapper::Persistence#save} method to
+    # Override {FlatMap::OpenMapper::Persistence#save} method to
     # force it to return +true+ if +self+ is marked for skipping.
     #
     # @return [Boolean]
@@ -44,7 +48,7 @@ module FlatMap
       skipped? || super
     end
 
-    # Override {FlatMap::BaseMapper::Persistence#shallow_save} method
+    # Override {FlatMap::OpenMapper::Persistence#shallow_save} method
     # to make it possible to skip traits.
     #
     # @return [Boolean]
@@ -53,7 +57,7 @@ module FlatMap
     end
 
     # Mark self as used and then delegated to original
-    # {FlatMap::BaseMapper::Persistence#write}.
+    # {FlatMap::OpenMapper::Persistence#write}.
     def write(*)
       use!
       super

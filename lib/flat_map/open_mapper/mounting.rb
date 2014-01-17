@@ -6,7 +6,7 @@ module FlatMap
   #
   # Also, the +method_missing+ method is defined here to delegate the missing
   # method to the very first mounted mapper that responds to it.
-  module BaseMapper::Mounting
+  module OpenMapper::Mounting
     extend ActiveSupport::Concern
 
     included do
@@ -21,14 +21,14 @@ module FlatMap
       # mapper.
       #
       # @param [*Object] args
-      # @return [Array<FlatMap::BaseMapper::Factory>]
+      # @return [Array<FlatMap::OpenMapper::Factory>]
       def mount(*args, &block)
-        mountings << FlatMap::BaseMapper::Factory.new(*args, &block)
+        mountings << FlatMap::OpenMapper::Factory.new(*args, &block)
       end
 
       # List of mountings (factories) of a class.
       #
-      # @return [Array<FlatMap::BaseMapper>]
+      # @return [Array<FlatMap::OpenMapper>]
       def mountings
         @mountings ||= []
       end
@@ -68,14 +68,14 @@ module FlatMap
 
     # Return list of mappings to be saved before saving target of +self+
     #
-    # @return [Array<FlatMap::BaseMapper>]
+    # @return [Array<FlatMap::OpenMapper>]
     def before_save_mountings
       nearest_mountings.select{ |mount| mount.save_order == :before }
     end
 
     # Return list of mappings to be saved after target of +self+ was saved
     #
-    # @return [Array<FlatMap::BaseMapper>]
+    # @return [Array<FlatMap::OpenMapper>]
     def after_save_mountings
       nearest_mountings.reject{ |mount| mount.save_order == :before }
     end
@@ -83,16 +83,16 @@ module FlatMap
     # Return all mountings that are mouted on +self+ directly or through
     # traits.
     #
-    # @return [Array<FlatMap::BaseMapper>]
+    # @return [Array<FlatMap::OpenMapper>]
     def nearest_mountings
       mountings.map{ |mount| mount.owned? ? mount.nearest_mountings : mount }.flatten
     end
 
     # Return a list of all mountings (mapper objects) associated with +self+.
     #
-    # Overridden in {Traits}.
+    # Overridden in {Traits}. Left here for consistency.
     #
-    # @return [Array<FlatMap::BaseMapper>]
+    # @return [Array<FlatMap::OpenMapper>]
     def mountings
       @mountings ||= self.class.mountings.map{ |factory| factory.create(self) }
     end
@@ -110,7 +110,7 @@ module FlatMap
     # list of all mountings of the owner. This will allow separate traits
     # to share methods via method_missing pattern.
     #
-    # @return [Array<FlatMap::BaseMapper>] mounted mappers (including traits)
+    # @return [Array<FlatMap::OpenMapper>] mounted mappers (including traits)
     def all_mountings
       return all_nested_mountings.unshift(self) unless owned?
       owner.all_mountings
@@ -119,7 +119,7 @@ module FlatMap
 
     # Return a list of mountings that are accessible by a named mapper.
     #
-    # @return [Array<FlatMap::BaseMapper>]
+    # @return [Array<FlatMap::OpenMapper>]
     def all_nested_mountings
       mountings.dup.concat(mountings.map{ |mount| mount.send(:all_nested_mountings) }).flatten
     end
@@ -149,20 +149,20 @@ module FlatMap
     protected :all_nested_mappings
 
     # Delegate missing method to any mounted mapping that respond to it,
-    # unless those methods are protected methods of FlatMap::BaseMapper.
+    # unless those methods are protected methods of FlatMap::OpenMapper.
     #
     # NOTE: :to_ary method is called internally by Ruby 1.9.3 when we call
     # something like [mapper].flatten. And we DO want default behavior
     # for handling this missing method.
     def method_missing(name, *args, &block)
       return super if name == :to_ary ||
-                      FlatMap::BaseMapper.protected_instance_methods.include?(name)
+                              self.class.protected_instance_methods.include?(name)
 
       return self[name] if mapping(name).present?
 
-      mount = all_mountings.find{ |_mount| _mount.respond_to?(name) }
-      return super if mount.nil?
-      mount.send(name, *args, &block)
+      mounting = all_mountings.find{ |mount| mount.respond_to?(name) }
+      return super if mounting.nil?
+      mounting.send(name, *args, &block)
     end
   end
 end

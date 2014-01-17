@@ -1,9 +1,17 @@
 module FlatMap
-  # +BaseMapper+ is an abstract class that hosts overwhelming majority
-  # of common functionality of {EmptyMapper EmptyMappers} and {Mapper Mappers}.
-  #
-  # For more detailed information on what mappers are, refer to {Mapper} documentation.
-  class BaseMapper
+  # Base Mapper that can be used for mounting other mappers, handling business logic,
+  # etc. For the intentional usage of mappers, pleas see {ModelMapper}
+  class OpenMapper
+    # Raised when mapper is initialized with no target defined
+    class NoTargetError < ArgumentError
+      # Initializes exception with a name of mapper class.
+      #
+      # @param [Class] mapper_class class of mapper being initialized
+      def initialize(mapper_class)
+        super("Target object is required to initialize #{mapper_class.name}")
+      end
+    end
+
     extend ActiveSupport::Autoload
 
     autoload :Mapping
@@ -22,8 +30,8 @@ module FlatMap
     include Persistence
     include Skipping
 
-    attr_reader :traits
     attr_writer :host, :suffix
+    attr_reader :target, :traits
     attr_accessor :owner, :name
 
     # Callback to dup mappings and mountings on inheritance.
@@ -38,11 +46,21 @@ module FlatMap
       subclass.mountings = mountings.dup
     end
 
-    # Raise exception on trying to initialize an instance.
+    # Initializes +mapper+ with +target+ and +traits+, which are
+    # used to fetch proper list of mounted mappers. Raises error
+    # if target is not specified.
     #
-    # @raise [RuntimeError]
-    def initialize
-      raise 'BaseMapper is abstract class and cannot be initialized'
+    # @param [Object] target Target of mapping
+    # @param [*Symbol] traits List of traits
+    # @raise [FlatMap::Mapper::NoTargetError]
+    def initialize(target, *traits)
+      raise NoTargetError.new(self.class) unless target.present?
+
+      @target, @traits = target, traits
+
+      if block_given?
+        singleton_class.trait :extension, &Proc.new
+      end
     end
 
     # Return a simple string representation of +mapper+. Done so to

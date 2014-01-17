@@ -180,34 +180,15 @@ module FlatMap
   #   mapper.read[:first_name] # => John
   #   mapper.first_name # => 'John'
   #   mapper.last_name = 'Smith'
-  class Mapper < BaseMapper
+  class ModelMapper < OpenMapper
     extend ActiveSupport::Autoload
 
-    autoload :Targeting
+    autoload :Persistence
     autoload :Skipping
 
-    include Targeting
+    include Persistence
     include Skipping
 
-    attr_reader :target
-
     delegate :logger, :to => :target
-
-    # Initializes +mapper+ with +target+ and +traits+, which are
-    # used to fetch proper list of mounted mappers. Raises error
-    # if target is not specified.
-    #
-    # @param [Object] target Target of mapping
-    # @param [*Symbol] traits List of traits
-    # @raise [FlatMap::Mapper::NoTargetError]
-    def initialize(target, *traits)
-      raise Targeting::NoTargetError.new(self.class) unless target.present?
-
-      @target, @traits = target, traits
-
-      if block_given?
-        singleton_class.trait :extension, &Proc.new
-      end
-    end
   end
 end

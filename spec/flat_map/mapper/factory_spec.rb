@@ -51,6 +51,14 @@ module FlatMap
           mount_factory.mapper_class.should == ::SpecMountMapper
         end
 
+        it "should be able to fetch class from mapper_class" do
+          factory = OpenMapper::Factory.new(
+                      :spec_mount,
+                      :mapper_class => FlatMap::OpenMapper::Factory::SpecMountMapper
+                    )
+          factory.mapper_class.should == ::FlatMap::OpenMapper::Factory::SpecMountMapper
+        end
+
         it "should use options if specified" do
           factory = OpenMapper::Factory.new(
                       :spec_mount,

@@ -1,5 +1,5 @@
 module FlatMap
-  # This module enhances and modifies original FlatMap::OpenMapper::Persistance
+  # This module enhances and modifies original FlatMap::OpenMapper::Persistence
   # functionality for ActiveRecord models as targets.
   module ModelMapper::Persistence
     extend ActiveSupport::Concern

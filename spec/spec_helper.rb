@@ -1,5 +1,6 @@
 require 'flat_map'
 require 'ostruct'
+require 'pry'
 
 require 'simplecov'
 SimpleCov.start do

@@ -6,12 +6,12 @@ gemspec
 group :development do
   gem 'redcarpet'
   gem 'yard'
-  gem 'pry'
 end
 
 group :development, :test do
   # code metrics:
   gem "metric_fu"
+  gem "pry"
 end
 
 group :test do

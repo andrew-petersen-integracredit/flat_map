@@ -164,5 +164,18 @@ module FlatMap
       return super if mounting.nil?
       mounting.send(name, *args, &block)
     end
+
+    # Look for methods that might be dynamically defined and define them for lookup.
+    def respond_to_missing?(name, include_private = false)
+      # Added magically by Ruby 1.9.3
+      if name == :to_ary || name == :empty?
+        false
+      else
+        return true if mapping(name).present?
+
+        mounting = all_mountings.find{ |mount| mount.respond_to?(name) }
+        return false if mounting.nil?
+      end
+    end
   end
 end

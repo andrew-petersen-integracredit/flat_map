@@ -85,7 +85,8 @@ the host mapper itself, but may be defined manually.
 
 The following options may be used when mounting a mapper:
 
-* `:mapper_class` Specifies mapper class if it cannot be determined from mounting itself
+* `:mapper_class` Specifies mapper class if it cannot be determined from mounting itself.
+* `:mapper_class_name` Alternate string form of class name instead of mapper_class.
 * `:target` Allows to manually specify target for the new mapper. May be oject or lambda
             with arity of one that accepts host mapper target as argument. Comes in handy
             when target cannot be obviously detected or requires additional setup:

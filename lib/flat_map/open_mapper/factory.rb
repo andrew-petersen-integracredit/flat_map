@@ -52,6 +52,7 @@ module FlatMap
         case
         when traited?        then @identifier
         when @options[:open] then open_mapper_class
+        when @options[:mapper_class] then @options[:mapper_class]
         else
           class_name = @options[:mapper_class_name] || "#{name.to_s.camelize}Mapper"
           class_name.constantize

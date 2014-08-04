@@ -85,8 +85,8 @@ module FlatMap
     end
 
     describe 'properties' do
-      it{ mapper.hosted?.should be_false }
-      it{ mounting.hosted?.should be_true }
+      it{ mapper.hosted?.should be false }
+      it{ mounting.hosted?.should be true }
       it{ mounting.host.should == mapper }
     end
 

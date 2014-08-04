@@ -106,16 +106,16 @@ module FlatMap
 
       describe '#save_target' do
         it 'should return true for owned mappers' do
-          mapper.extension.save_target.should be_true
+          mapper.extension.save_target.should be true
         end
 
         it 'should return true if target does not respond to #save' do
-          mapper.save_target.should be_true
+          mapper.save_target.should be true
         end
 
         it 'should save with no validation if target responds to #save' do
           target.should_receive(:save).with(:validate => false).and_return(true)
-          mapper.save_target.should be_true
+          mapper.save_target.should be true
         end
       end
 

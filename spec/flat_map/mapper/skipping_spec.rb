@@ -29,7 +29,7 @@ module FlatMap
 
     it 'should completely ignore skipped mounting' do
       mapper.should be_valid
-      mapper.save.should be_true
+      mapper.save.should be true
       mapper.attr_a.should be_nil
       mapper.attr_b.should be_nil
     end
@@ -60,12 +60,12 @@ module FlatMap
       end
 
       specify '#skip! should set ivar @destroyed to true' do
-        target.instance_variable_get('@destroyed').should be_true
+        target.instance_variable_get('@destroyed').should be true
       end
 
       specify '#use! should set ivar @destroyed to true' do
         mapper.trait(:with_trait).use!
-        target.instance_variable_get('@destroyed').should be_false
+        target.instance_variable_get('@destroyed').should be false
       end
     end
 

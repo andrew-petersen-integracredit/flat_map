@@ -265,11 +265,11 @@ module FlatMap
         let(:factory_for_b){ mapper_class.mountings.first.mapper_class.mountings.first }
 
         it "should be required for nested trait" do
-          factory_for_b.required_for_any_trait?([:trait_c]).should be_true
+          factory_for_b.required_for_any_trait?([:trait_c]).should be true
         end
 
         it "should not be required for top trait" do
-          factory_for_b.required_for_any_trait?([:trait_a]).should be_false
+          factory_for_b.required_for_any_trait?([:trait_a]).should be false
         end
       end
     end

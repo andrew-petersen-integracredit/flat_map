@@ -1,5 +1,5 @@
 require 'flat_map'
-require 'ostruct'
+require 'rspec/its'
 
 require 'simplecov'
 SimpleCov.start do

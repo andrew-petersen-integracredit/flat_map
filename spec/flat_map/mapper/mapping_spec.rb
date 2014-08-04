@@ -48,8 +48,8 @@ module FlatMap
     end
 
     specify 'mapper class should have defined mappings' do
-      MappingSpec::SpecMapper.should have(4).mappings
-      MappingSpec::SpecMapper.mappings.all?{ |m| m.is_a?(Mapping::Factory) }.should be_true
+      MappingSpec::SpecMapper.mappings.size.should == 4
+      MappingSpec::SpecMapper.mappings.all?{ |m| m.is_a?(Mapping::Factory) }.should be true
     end
 
     context "for initialized mapper" do

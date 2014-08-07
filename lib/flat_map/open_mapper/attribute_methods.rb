@@ -58,6 +58,13 @@ module FlatMap
       valid_names.include?(name)
     end
 
+    # Return the list of all mapped attributes
+    #
+    # @return [Array<String>]
+    def attribute_names
+      all_mappings.map { |mapping| mapping.full_name }
+    end
+
     # Actually define the attribute methods on this object.
     #
     # @param [Array<FlatMap::Mapping>] mappings list of mappings

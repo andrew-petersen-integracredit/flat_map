@@ -77,7 +77,8 @@ module FlatMap
   #
   # The following options may be used when mounting a mapper:
   # [<tt>:mapper_class</tt>] Specifies mapper class if it cannot be determined from mounting itself
-  # [<tt>:target</tt>] Allows to manually specify target for the new mapper. May be oject or lambda
+  # [<tt>:mapper_class_name</tt>] Alternate string form of class name instead of mapper_class.
+  # [<tt>:target</tt>] Allows to manually specify target for the new mapper. May be an object or lambda
   #                    with arity of one that accepts host mapper target as argument. Comes in handy
   #                    when target cannot be obviously detected or requires additional setup:
   #                    <tt>mount :title, :target => lambda{ |customer| customer.title_customers.build.build_title }</tt>

@@ -17,11 +17,11 @@ module FlatMap
     end
 
     it 'correctly responds to dynamic methods' do
-      mapper.respond_to?(:attr_a=).should be_true
-      mapper.method(:attr_a=).should_not be_nil
+      mapper.respond_to?(:attr_a=).should be true
+      mapper.method(:attr_a=).should_not be nil
 
-      mapper.respond_to?(:attr_b=).should be_true
-      mapper.method(:attr_b=).should_not be_nil
+      mapper.respond_to?(:attr_b=).should be true
+      mapper.method(:attr_b=).should_not be nil
     end
 
     it 'should be able to read values via method calls' do

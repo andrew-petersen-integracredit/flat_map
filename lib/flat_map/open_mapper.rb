@@ -54,7 +54,7 @@ module FlatMap
     # @param [*Symbol] traits List of traits
     # @raise [FlatMap::Mapper::NoTargetError]
     def initialize(target, *traits)
-      raise NoTargetError.new(self.class) unless target.present?
+      raise NoTargetError.new(self.class) unless target
 
       @target, @traits = target, traits
 

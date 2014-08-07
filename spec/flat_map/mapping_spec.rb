@@ -30,7 +30,7 @@ module FlatMap
         its(:target_attribute){ should == :attr }
         its(:full_name){ should == :name_foo }
         its(:multiparam){ should == Date }
-        its(:multiparam?){ should be_true }
+        its(:multiparam?){ should be true }
       end
 
       describe "#fetch_reader" do

@@ -8,6 +8,8 @@ into a mapper object with all mapped attributes accessible in a plain way.
 
 ## Usage
 
+    gem "HornsAndHooves-flat_map", require: "flat_map"
+
 ### Mapper
 
 FlatMap mappers are designed to provide complex set of data, distributed over

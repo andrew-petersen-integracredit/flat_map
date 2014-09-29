@@ -5,7 +5,7 @@ require "flat_map/version"
 Gem::Specification.new do |s|
   s.name        = "HornsAndHooves-flat_map"
   s.version     = FlatMap::VERSION
-  s.authors     = ["Artem Kuzko", "Zachary Belzer", "Sergey Potapov"]
+  s.authors     = ["HornsAndHooves", "Artem Kuzko", "Zachary Belzer", "Sergey Potapov"]
   s.email       = ["a.kuzko@gmail.com", "zbelzer@gmail.com", "blake131313@gmail.com"]
   s.homepage    = "https://github.com/HornsAndHooves/flat_map"
   s.licenses    = ["LICENSE"]

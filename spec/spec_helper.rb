@@ -1,4 +1,6 @@
 require 'flat_map'
+require 'ostruct'
+require 'pry'
 require 'rspec/its'
 
 require 'simplecov'

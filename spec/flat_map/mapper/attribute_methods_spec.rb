@@ -16,6 +16,14 @@ module FlatMap
       target.attr_b = 'b'
     end
 
+    it 'correctly responds to dynamic methods' do
+      mapper.respond_to?(:attr_a=).should be true
+      mapper.method(:attr_a=).should_not be nil
+
+      mapper.respond_to?(:attr_b=).should be true
+      mapper.method(:attr_b=).should_not be nil
+    end
+
     it 'should be able to read values via method calls' do
       mapper.attr_a.should == 'a'
       mapper.attr_b.should == 'b'

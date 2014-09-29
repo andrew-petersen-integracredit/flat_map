@@ -15,22 +15,64 @@ module FlatMap
       if name == :to_ary ||
           @attribute_methods_defined ||
           self.class.protected_instance_methods.include?(name)
-        return super
-      end
+        super
+      else
+        mappings = all_mappings
 
-      mappings    = all_mappings
+        if mapped_name?(mappings, name)
+          define_attribute_methods(mappings)
+
+          send(name, *args, &block)
+        else
+          super
+        end
+      end
+    end
+
+    # Look for methods that might be dynamically defined and define them for lookup.
+    def respond_to_missing?(name, include_private = false)
+      # Added magically by Ruby 1.9.3
+      if name == :to_ary || name == :empty?
+        false
+      else
+        unless @attribute_methods_defined
+          define_attribute_methods(all_mappings)
+        end
+
+        mapped_name?(all_mappings, name)
+      end
+    end
+
+    # Is the name given part of the attribute mappings?
+    #
+    # @param [Array<FlatMap::Mapping>] mappings
+    # @param [String] name
+    # @return Boolean
+    def mapped_name?(mappings, name)
       valid_names = mappings.map do |mapping|
         full_name = mapping.full_name
         [full_name, "#{full_name}=".to_sym]
       end
       valid_names.flatten!
 
-      return super unless valid_names.include?(name)
+      valid_names.include?(name)
+    end
 
+    # Return the list of all mapped attributes
+    #
+    # @return [Array<String>]
+    def attribute_names
+      all_mappings.map { |mapping| mapping.full_name }
+    end
+
+    # Actually define the attribute methods on this object.
+    #
+    # @param [Array<FlatMap::Mapping>] mappings list of mappings
+    def define_attribute_methods(mappings)
       extend attribute_methods(mappings)
       @attribute_methods_defined = true
-      send(name, *args, &block)
     end
+    private :define_attribute_methods
 
     # Define anonymous module with reader and writer methods for
     # all the +mappings+ being passed.

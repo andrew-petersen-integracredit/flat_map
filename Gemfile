@@ -6,15 +6,16 @@ gemspec
 group :development do
   gem 'redcarpet'
   gem 'yard'
-  gem 'pry'
 end
 
 group :development, :test do
   # code metrics:
   gem "metric_fu"
+  gem "pry"
 end
 
 group :test do
+  gem 'colorize'           , :require => false
   gem 'simplecov'          , :require => false
   gem 'simplecov-rcov-text', :require => false
 end

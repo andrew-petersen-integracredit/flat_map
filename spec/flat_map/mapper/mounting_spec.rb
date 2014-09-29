@@ -95,19 +95,39 @@ module FlatMap
       mapper.mounting(:undefined_mount).should be_nil
     end
 
-    it '#read should add mounted mappers to a result' do
-      mapper.read.should == {
-        :host_attr     => 'attr',
-        :attr_a        => 'a',
-        :mapped_attr_b => 'b'
-      }
+    describe "#read" do
+      it 'should add mounted mappers to a result' do
+        mapper.read.should == {
+          :host_attr     => 'attr',
+          :attr_a        => 'a',
+          :mapped_attr_b => 'b'
+        }
+      end
+
+      it 'should define dynamic writer methods' do
+        mapper.respond_to?(:attr_a).should be true
+        mapper.method(:attr_a).should_not  be nil
+
+        mapper.respond_to?(:mapped_attr_b).should be true
+        mapper.method(:mapped_attr_b).should_not  be nil
+      end
     end
 
-    it '#write should pass values to mounted mappers' do
-      target = MountingSpec.mount_target
-      mapper.write :attr_a => 'A', :mapped_attr_b => 'B'
-      target.attr_a.should == 'A'
-      target.attr_b.should == 'B'
+    describe "#write" do
+      it 'should define dynamic writer methods' do
+        mapper.respond_to?(:attr_a=).should be true
+        mapper.method(:attr_a=).should_not  be nil
+
+        mapper.respond_to?(:mapped_attr_b=).should be true
+        mapper.method(:mapped_attr_b=).should_not  be nil
+      end
+
+      it 'should pass values to mounted mappers' do
+        target = MountingSpec.mount_target
+        mapper.write :attr_a => 'A', :mapped_attr_b => 'B'
+        target.attr_a.should == 'A'
+        target.attr_b.should == 'B'
+      end
     end
 
     it 'should delegate missing methods to mounted mappers' do

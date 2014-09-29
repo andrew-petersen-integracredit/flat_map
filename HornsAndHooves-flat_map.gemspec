@@ -3,17 +3,15 @@ $:.push File.expand_path("../lib", __FILE__)
 require "flat_map/version"
 
 Gem::Specification.new do |s|
-  s.name        = "flat_map"
+  s.name        = "HornsAndHooves-flat_map"
   s.version     = FlatMap::VERSION
-  s.authors     = ["TMX Credit", "Artem Kuzko", "Zachary Belzer", "Sergey Potapov"]
-  s.email       = ["rubygems@tmxcredit.com", "a.kuzko@gmail.com", "zbelzer@gmail.com", "blake131313@gmail.com"]
-  s.homepage    = "https://github.com/TMXCredit/flat_map"
+  s.authors     = ["Artem Kuzko", "Zachary Belzer", "Sergey Potapov"]
+  s.email       = ["a.kuzko@gmail.com", "zbelzer@gmail.com", "blake131313@gmail.com"]
+  s.homepage    = "https://github.com/HornsAndHooves/flat_map"
   s.licenses    = ["LICENSE"]
   s.summary     = %q{Deep object graph to a plain properties mapper}
   s.description = %q{This library allows to map accessors and properties of deeply
     nested object graph to a plain mapper object with flexible behavior}
-
-  s.rubyforge_project = "flat_map"
 
   s.files         = `git ls-files`.split("\n")
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")

@@ -1,6 +1,6 @@
 # FlatMap
 
-[![Build Status](https://secure.travis-ci.org/TMXCredit/flat_map.png)](http://travis-ci.org/TMXCredit/flat_map)
+[![Build Status](https://secure.travis-ci.org/HornsAndHooves/flat_map.png)](http://travis-ci.org/HornsAndHooves/flat_map)
 
 FlatMap is a flexible tool for mapping a complex, deeply nested object graph
 into a mapper object with all mapped attributes accessible in a plain way.
@@ -208,5 +208,7 @@ rake spec
 * [Potapov Sergey](https://github.com/greyblake)
 
 ## Copyright
+
+Copyright (c) 2014 HornsAndHooves.
 
 Copyright (c) 2013 TMX Credit.

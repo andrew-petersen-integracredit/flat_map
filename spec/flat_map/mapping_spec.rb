@@ -115,7 +115,7 @@ module FlatMap
 
     def stub_target(assignment = nil)
       target = double('target', :attr => 'target_foo')
-      mapper.stub(:target).and_return(target)
+      allow(mapper).to receive(:target).and_return(target)
       expect(target).to receive(:attr=).with(assignment) if assignment.present?
       target
     end

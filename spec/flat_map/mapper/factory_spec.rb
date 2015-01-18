@@ -96,8 +96,8 @@ module FlatMap
 
         context 'target from association' do
           before do
-            target.stub(:is_a?).and_call_original
-            target.stub(:is_a?).with(ActiveRecord::Base).and_return(true)
+            allow(target).to  receive(:is_a?).and_call_original
+            expect(target).to receive(:is_a?).with(ActiveRecord::Base).and_return(true)
           end
 
           let(:has_one_current_reflection) {
@@ -147,25 +147,25 @@ module FlatMap
                           with(target).
                           and_return(has_many_reflection)
             expect(target).to receive(:association).with(:spec_mounts)
-            target.stub_chain(:association, :build).and_return(other_target)
+            allow(target).to receive_message_chain(:association, :build).and_return(other_target)
             expect(mount_factory.fetch_target_from(mapper)).to eq other_target
           end
 
           describe 'reflection_from_target' do
-            before{ target.stub(:is_a?).with(ActiveRecord::Base).and_return(true) }
+            before{ allow(target).to receive(:is_a?).with(ActiveRecord::Base).and_return(true) }
 
             it 'should first refer to singular association' do
-              target.stub_chain(:class, :reflect_on_association).
+              allow(target).to receive_message_chain(:class, :reflect_on_association).
                      with(:spec_mount).
                      and_return(has_one_reflection)
               expect(mount_factory.reflection_from_target(target)).to eq has_one_reflection
             end
 
             it 'should use collection association if singular does not exist' do
-              target.stub_chain(:class, :reflect_on_association).
+              allow(target).to receive_message_chain(:class, :reflect_on_association).
                      with(:spec_mount).
                      and_return(nil)
-              target.stub_chain(:class, :reflect_on_association).
+              allow(target).to receive_message_chain(:class, :reflect_on_association).
                      with(:spec_mounts).
                      and_return(has_many_reflection)
               expect(mount_factory.reflection_from_target(target)).to eq has_many_reflection
@@ -192,8 +192,8 @@ module FlatMap
           let(:factory){ mount_factory }
 
           before do
-            factory.stub(:mapper_class).and_return(mount_class)
-            factory.stub(:fetch_target_from).and_return(other_target)
+            allow(factory).to receive(:mapper_class     ).and_return(mount_class)
+            allow(factory).to receive(:fetch_target_from).and_return(other_target)
           end
 
           it 'should combine traits' do
@@ -235,18 +235,18 @@ module FlatMap
 
           describe 'save order' do
             before do
-              mapper.stub(:is_a?).and_call_original
-              mapper.stub(:is_a?).with(ModelMapper).and_return(true)
+              allow(mapper).to receive(:is_a?).and_call_original
+              allow(mapper).to receive(:is_a?).with(ModelMapper).and_return(true)
             end
 
             it 'should be :before for belongs_to association' do
-              factory.stub(:reflection_from_target).
+              expect(factory).to receive(:reflection_from_target).
                       and_return(double('reflection', :macro => :belongs_to))
               expect(factory.fetch_save_order(mapper)).to eq :before
             end
 
             it 'should be :after for other cases' do
-              factory.stub(:reflection_from_target).
+              expect(factory).to receive(:reflection_from_target).
                       and_return(double('reflection', :macro => :has_one))
               expect(factory.fetch_save_order(mapper)).to eq :after
             end

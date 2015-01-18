@@ -29,24 +29,23 @@ module FlatMap
   describe 'Working with Target' do
     describe '#target_class' do
       it 'should detect target_class from mapper class name' do
-        ModelMethodsSpec::TargetClassMapper.target_class.should == ModelMethodsSpec::TargetClass
+        expect(ModelMethodsSpec::TargetClassMapper.target_class).to eq ModelMethodsSpec::TargetClass
       end
 
       it 'should detect target_class from nearest ancestor when inherited' do
-        ModelMethodsSpec::InheritedClassMapper.target_class.
-                                               should == ModelMethodsSpec::TargetClass
+        expect(ModelMethodsSpec::InheritedClassMapper.target_class.ancestors).
+          to include ModelMethodsSpec::TargetClass
       end
 
       it 'should use explicit class name if specified' do
-        ModelMethodsSpec::ExplicitNameMapper.target_class.
-                                             should == ModelMethodsSpec::OtherTargetClass
+        expect(ModelMethodsSpec::ExplicitNameMapper.target_class.ancestors).
+          to include ModelMethodsSpec::OtherTargetClass
       end
     end
 
     describe '.build' do
       it 'should use target class to build a new object for mapper' do
-        ModelMethodsSpec::TargetClassMapper.
-          should_receive(:new).
+        expect(ModelMethodsSpec::TargetClassMapper).to receive(:new).
           with(kind_of(ModelMethodsSpec::TargetClass), :used_trait)
         ModelMethodsSpec::TargetClassMapper.build(:used_trait)
       end
@@ -56,8 +55,8 @@ module FlatMap
       let(:target){ ModelMethodsSpec::TargetClass.new('a', 'b') }
 
       it 'should delegate to target class to find object for mapper' do
-        ModelMethodsSpec::TargetClass.should_receive(:find).with(1).and_return(target)
-        ModelMethodsSpec::TargetClassMapper.should_receive(:new).with(target, :used_trait)
+        expect(ModelMethodsSpec::TargetClass).to receive(:find).with(1).and_return(target)
+        expect(ModelMethodsSpec::TargetClassMapper).to receive(:new).with(target, :used_trait)
         ModelMethodsSpec::TargetClassMapper.find(1, :used_trait)
       end
     end
@@ -67,30 +66,30 @@ module FlatMap
       let(:mapper){ ModelMethodsSpec::TargetClassMapper.new(target){} }
 
       specify '#model_name' do
-        mapper.model_name.should == 'mapper'
+        expect(mapper.model_name).to eq 'mapper'
       end
 
       specify '#to_key should delegate to target' do
-        target.should_receive(:to_key).and_return(1)
-        mapper.to_key.should == 1
+        expect(target).to receive(:to_key).and_return(1)
+        expect(mapper.to_key).to eq 1
       end
 
       specify '#persisted? when target does not respond to :persised?' do
-        mapper.should_not be_persisted
+        expect(mapper).not_to be_persisted
       end
 
       specify '#persisted? when target responds to :persisted?' do
-        target.stub(:persisted?).and_return(true)
-        mapper.should be_persisted
+        expect(target).to receive(:persisted?).and_return(true)
+        expect(mapper).to be_persisted
       end
 
       specify '#id when target does not respond to :id' do
-        mapper.id.should be_nil
+        expect(mapper.id).to be_nil
       end
 
       specify '#id when target responds to :id' do
-        target.stub(:id).and_return(1)
-        mapper.id.should == 1
+        expect(target).to receive(:id).and_return(1)
+        expect(mapper.id).to eq 1
       end
 
       describe '#write with multiparams' do
@@ -103,23 +102,23 @@ module FlatMap
 
         it 'should assign values properly' do
           mapper.write(params)
-          target.attr_a.should == 'A'
-          target.attr_b.should == Date.new(1999, 1, 2)
+          expect(target.attr_a).to eq 'A'
+          expect(target.attr_b).to eq Date.new(1999, 1, 2)
         end
       end
 
       describe '#save_target' do
         it 'should return true for owned mappers' do
-          mapper.extension.save_target.should be true
+          expect(mapper.extension.save_target).to be true
         end
 
         it 'should return true if target does not respond to #save' do
-          mapper.save_target.should be true
+          expect(mapper.save_target).to be true
         end
 
         it 'should save with no validation if target responds to #save' do
-          target.should_receive(:save).with(:validate => false).and_return(true)
-          mapper.save_target.should be true
+          expect(target).to receive(:save).with(:validate => false).and_return(true)
+          expect(mapper.save_target).to be true
         end
       end
 
@@ -127,28 +126,28 @@ module FlatMap
         let(:params){{ :attr_a => 'A' }}
 
         it 'should write params first' do
-          mapper.should_receive(:write).with(params)
-          ActiveRecord::Base.should_receive(:transaction).and_yield
+          expect(mapper).to receive(:write).with(params)
+          expect(ActiveRecord::Base).to receive(:transaction).and_yield
           mapper.apply(params)
         end
 
         it 'should not save if not valid' do
-          mapper.stub(:valid?).and_return(false)
-          mapper.should_not_receive(:save)
+          expect(mapper).to     receive(:valid?).and_return(false)
+          expect(mapper).not_to receive(:save)
           mapper.apply(params)
         end
 
         it 'should save if valid' do
-          mapper.stub(:valid?).and_return(true)
-          ActiveRecord::Base.should_receive(:transaction).and_yield
-          mapper.should_receive(:save)
+          expect(mapper).to receive(:valid?).and_return(true)
+          expect(ActiveRecord::Base).to receive(:transaction).and_yield
+          expect(mapper).to receive(:save)
           mapper.apply(params)
         end
       end
 
       specify '#shallow_save saves target in a save callbacks' do
-        mapper.should_receive(:run_callbacks).with(:save).and_yield
-        mapper.should_receive(:save_target)
+        expect(mapper).to receive(:run_callbacks).with(:save).and_yield
+        expect(mapper).to receive(:save_target)
         mapper.shallow_save
       end
     end

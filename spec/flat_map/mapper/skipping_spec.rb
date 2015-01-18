@@ -28,22 +28,22 @@ module FlatMap
     before{ mapper.trait(:with_trait).skip! }
 
     it 'should completely ignore skipped mounting' do
-      mapper.should be_valid
-      mapper.save.should be true
-      mapper.attr_a.should be_nil
-      mapper.attr_b.should be_nil
+      expect(mapper       ).to be_valid
+      expect(mapper.save  ).to be true
+      expect(mapper.attr_a).to be_nil
+      expect(mapper.attr_b).to be_nil
     end
 
     it '#use! should enable skipped mounting' do
       mapper.trait(:with_trait).use!
 
-      mapper.should_not be_valid
-      mapper.attr_a.should == 'a'
-      mapper.errors[:attr_a].should be_present
+      expect(mapper).not_to be_valid
+      expect(mapper.attr_a).to eq 'a'
+      expect(mapper.errors[:attr_a]).to be_present
 
       mapper.attr_a = 5
       mapper.save
-      mapper.attr_b.should == 'b'
+      expect(mapper.attr_b).to eq 'b'
     end
   end
 
@@ -60,12 +60,12 @@ module FlatMap
       end
 
       specify '#skip! should set ivar @destroyed to true' do
-        target.instance_variable_get('@destroyed').should be true
+        expect(target.instance_variable_get('@destroyed')).to be true
       end
 
       specify '#use! should set ivar @destroyed to true' do
         mapper.trait(:with_trait).use!
-        target.instance_variable_get('@destroyed').should be false
+        expect(target.instance_variable_get('@destroyed')).to be false
       end
     end
 
@@ -75,14 +75,14 @@ module FlatMap
       end
 
       specify '#skip! should reload persisted record' do
-        target.should_receive(:reload)
+        expect(target).to receive(:reload)
         mapper.trait(:with_trait).skip!
       end
 
       specify '#use! should use all nested mountings' do
         mapper.trait(:with_trait).skip!
         mock = double('mounting')
-        mock.should_receive(:use!)
+        expect(mock).to receive(:use!)
         mapper.trait(:with_trait).stub(:all_nested_mountings).and_return([mock])
         mapper.trait(:with_trait).use!
       end

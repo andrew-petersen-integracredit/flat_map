@@ -52,21 +52,21 @@ module FlatMap
     end
 
     it 'should not be valid' do
-      mapper.should_not be_valid
+      expect(mapper).not_to be_valid
     end
 
     it 'should call callbacks' do
-      mapper.trait(:with_trait).should_receive(:set_default_attr_b).and_call_original
+      expect(mapper.trait(:with_trait)).to receive(:set_default_attr_b).and_call_original
       mapper.valid?
-      mapper.attr_b.should == 'foo'
+      expect(mapper.attr_b).to eq 'foo'
     end
 
     it 'should have all the errors' do
       mapper.valid?
-      mapper.errors[:attr_a].should == ["can't be blank"]
-      mapper.errors[:attr_b].should == ["can't be foo"]
-      mapper.errors[:attr_c].should == ["can't be blank"]
-      mapper.errors[:attr_d].should == ["can't be blank"]
+      expect(mapper.errors[:attr_a]).to eq ["can't be blank"]
+      expect(mapper.errors[:attr_b]).to eq ["can't be foo"]
+      expect(mapper.errors[:attr_c]).to eq ["can't be blank"]
+      expect(mapper.errors[:attr_d]).to eq ["can't be blank"]
     end
   end
 end

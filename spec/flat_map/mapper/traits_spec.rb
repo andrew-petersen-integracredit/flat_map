@@ -51,14 +51,14 @@ module FlatMap
   describe 'Traits' do
     describe 'trait definition' do
       it "should add a traited mapper factory to a class" do
-        TraitsSpec::EmptyMapper.should_receive(:mount).
+        expect(TraitsSpec::EmptyMapper).to receive(:mount).
                                 with(kind_of(Class), :trait_name => :a_trait).
                                 and_call_original
         expect{ TraitsSpec::EmptyMapper.trait(:a_trait) }.
           to change{ TraitsSpec::EmptyMapper.mountings.length }.by(1)
         trait_mapper_class =
           TraitsSpec::EmptyMapper.mountings.first.instance_variable_get('@identifier')
-        trait_mapper_class.name.should == 'FlatMap::TraitsSpec::EmptyMapperATraitTrait'
+        expect(trait_mapper_class.name).to eq 'FlatMap::TraitsSpec::EmptyMapperATraitTrait'
       end
     end
 
@@ -79,25 +79,25 @@ module FlatMap
       end
 
       it 'should be able to access trait by name' do
-        mapper.trait(:trait_one).should be_a(Mapper)
-        mapper.trait(:undefined).should be_nil
+        expect(mapper.trait(:trait_one)).to be_a(Mapper)
+        expect(mapper.trait(:undefined)).to be_nil
       end
 
       it 'should not contain unused trait' do
-        mapper.trait(:trait_two).should be_nil
+        expect(mapper.trait(:trait_two)).to be_nil
       end
 
       it 'should have mountings of a trait' do
-        mapper.mounting(:spec_mount).should be_present
+        expect(mapper.mounting(:spec_mount)).to be_present
       end
 
       it '#read should read values with respect to trait' do
-        mapper.read.should == {
+        expect(mapper.read).to eq({
           :attr_a => 'a',
           :attr_b => 'b',
           :attr_c => 'c',
           :attr_d => 'd'
-        }
+        })
       end
 
       it '#write should properly distribute values' do
@@ -106,33 +106,33 @@ module FlatMap
           :attr_b => 'B',
           :attr_c => 'C',
           :attr_d => 'D'
-        target.attr_a.should == 'A'
-        target.attr_b.should == 'B'
-        mount_target.attr_c.should == 'C'
-        mount_target.attr_d.should == 'D'
+        expect(target.attr_a      ).to eq 'A'
+        expect(target.attr_b      ).to eq 'B'
+        expect(mount_target.attr_c).to eq 'C'
+        expect(mount_target.attr_d).to eq 'D'
       end
 
       specify 'mapper should be avle to call methods of enabled traits' do
         mapper = TraitsSpec::HostMapper.new(target, :trait_one)
-        mapper.method_one.should == 'one'
+        expect(mapper.method_one).to eq 'one'
         expect{ mapper.method_two }.to raise_error(NoMethodError)
       end
 
       specify 'traits should be able to call methods of each other' do
         mapper = TraitsSpec::HostMapper.new(target, :trait_one, :trait_two)
-        mapper.trait(:trait_two).method_two.should == 'one'
+        expect(mapper.trait(:trait_two).method_two).to eq 'one'
       end
 
       describe 'trait nesting' do
         let(:mapper){ TraitsSpec::HostMapper.new(target, :trait_one_nested) }
 
         it 'should still be able to have top-level trait definitions' do
-          mapper.mounting(:spec_mount).should be_present
-          mapper.method_one.should == 'one'
+          expect(mapper.mounting(:spec_mount)).to be_present
+          expect(mapper.method_one).to eq 'one'
         end
 
         it 'should have new definitions' do
-          mapper.method_one_nested.should == 'nested_one'
+          expect(mapper.method_one_nested).to eq 'nested_one'
         end
       end
 
@@ -150,21 +150,21 @@ module FlatMap
         end
 
         it 'should behave like a normal trait' do
-          mapper.trait(:extension).should be_present
-          mapper.read.should include :attr_b => 'b'
+          expect(mapper.trait(:extension)).to be_present
+          expect(mapper.read).to include :attr_b => 'b'
         end
 
         it 'should be accessible' do
-          mapper.extension.should be_present
+          expect(mapper.extension).to be_present
         end
 
         it 'should be_extension' do
-          mapper.extension.should be_extension
+          expect(mapper.extension).to be_extension
         end
 
         it "should be able to handle save exception of traits" do
           expect{ mapper.apply(:writing_error => 'foo') }.not_to raise_error
-          mapper.errors[:writing_error].should include 'cannot be foo'
+          expect(mapper.errors[:writing_error]).to include 'cannot be foo'
         end
       end
     end

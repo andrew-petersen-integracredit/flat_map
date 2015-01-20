@@ -11,13 +11,13 @@ describe FlatMap::Errors do
 
   it "preserved errors should appear on #empty? call exactly once" do
     errors.preserve :base, 'an error'
-    errors.should_not be_empty
-    errors[:base].should == ['an error']
+    expect(errors).not_to be_empty
+    expect(errors[:base]).to eq ['an error']
     expect{ errors.empty? }.not_to change{ errors[:base].length }
   end
 
   it "should add error to mapper with suffix" do
     errors.add(:attr, 'an error')
-    errors[:attr_foo].should == ['an error']
+    expect(errors[:attr_foo]).to eq ['an error']
   end
 end

@@ -8,8 +8,8 @@ module FlatMap
   end
 
   describe 'Attribute Methods' do
-    let(:target){ OpenStruct.new }
-    let(:mapper){ AttributeMethodsSpec::SpecMapper.new(target) }
+    let(:target) { OpenStruct.new }
+    let(:mapper) { AttributeMethodsSpec::SpecMapper.new(target) }
 
     before do
       target.attr_a = 'a'
@@ -17,27 +17,27 @@ module FlatMap
     end
 
     it 'correctly responds to dynamic methods' do
-      mapper.respond_to?(:attr_a=).should be true
-      mapper.method(:attr_a=).should_not be nil
+      expect(mapper).to respond_to(:attr_a=)
+      expect(mapper.method(:attr_a=)).not_to be_nil
 
-      mapper.respond_to?(:attr_b=).should be true
-      mapper.method(:attr_b=).should_not be nil
+      expect(mapper).to respond_to(:attr_b=)
+      expect(mapper.method(:attr_b=)).not_to be_nil
     end
 
     it 'should be able to read values via method calls' do
-      mapper.attr_a.should == 'a'
-      mapper.attr_b.should == 'b'
+      expect(mapper.attr_a).to eq 'a'
+      expect(mapper.attr_b).to eq 'b'
     end
 
     it 'should be able to write values via method calls' do
       mapper.attr_a = 'A'
       mapper.attr_b = 'B'
-      target.attr_a.should == 'A'
-      target.attr_b.should == 'B'
+      expect(target.attr_a).to eq 'A'
+      expect(target.attr_b).to eq 'B'
     end
 
     it 'should still raise for unknown or private method calls' do
-      expect{ mapper.undefined_method }.to raise_error(NoMethodError)
+      expect{ mapper.undefined_method  }.to raise_error(NoMethodError)
       expect{ mapper.attribute_methods }.to raise_error(NoMethodError)
     end
   end

@@ -49,27 +49,27 @@ module FlatMap
     end
 
     it 'should call callbacks once' do
-      mapper.should_receive(:set_a).once
+      expect(mapper).to receive(:set_a).once
       mapper.save
     end
 
     specify 'validation callbacks' do
       mapper.valid?
-      mapper.attr_a.should be_nil
-      mapper.attr_b.should == 'before validate'
-      mapper.attr_c.should == 'mounted before validate'
+      expect(mapper.attr_a).to be_nil
+      expect(mapper.attr_b).to eq 'before validate'
+      expect(mapper.attr_c).to eq 'mounted before validate'
     end
 
     specify 'save callbacks' do
       mapper.save
-      mapper.attr_a.should == 'before save'
+      expect(mapper.attr_a).to eq 'before save'
     end
 
     context 'extension trait and named traits' do
       it 'should process extension first' do
-        mapper.extension.should_receive(:extension_set_b).once.and_call_original
+        expect(mapper.extension).to receive(:extension_set_b).once.and_call_original
         mapper.valid?
-        mapper.attr_b.should == 'before validate'
+        expect(mapper.attr_b).to eq 'before validate'
       end
     end
   end

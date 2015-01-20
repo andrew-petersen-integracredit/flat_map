@@ -28,22 +28,22 @@ module FlatMap
     before{ mapper.trait(:with_trait).skip! }
 
     it 'should completely ignore skipped mounting' do
-      mapper.should be_valid
-      mapper.save.should be true
-      mapper.attr_a.should be_nil
-      mapper.attr_b.should be_nil
+      expect(mapper       ).to be_valid
+      expect(mapper.save  ).to be true
+      expect(mapper.attr_a).to be_nil
+      expect(mapper.attr_b).to be_nil
     end
 
     it '#use! should enable skipped mounting' do
       mapper.trait(:with_trait).use!
 
-      mapper.should_not be_valid
-      mapper.attr_a.should == 'a'
-      mapper.errors[:attr_a].should be_present
+      expect(mapper).not_to be_valid
+      expect(mapper.attr_a).to eq 'a'
+      expect(mapper.errors[:attr_a]).to be_present
 
       mapper.attr_a = 5
       mapper.save
-      mapper.attr_b.should == 'b'
+      expect(mapper.attr_b).to eq 'b'
     end
   end
 
@@ -51,39 +51,40 @@ module FlatMap
     let(:target){ OpenStruct.new }
     let(:mapper){ SkippingSpec::SpecMapper.new(target, :with_trait) }
 
-    before{ target.stub(:is_a?).with(ActiveRecord::Base).and_return(true) }
+    before{ expect(target).
+        to receive(:is_a?).at_least(1).times.with(ActiveRecord::Base).and_return(true) }
 
     context 'for new record' do
       before do
-        target.stub(:new_record?).and_return(true)
+        expect(target).to receive(:new_record?).at_least(1).times.and_return(true)
         mapper.trait(:with_trait).skip!
       end
 
       specify '#skip! should set ivar @destroyed to true' do
-        target.instance_variable_get('@destroyed').should be true
+        expect(target.instance_variable_get('@destroyed')).to be true
       end
 
       specify '#use! should set ivar @destroyed to true' do
         mapper.trait(:with_trait).use!
-        target.instance_variable_get('@destroyed').should be false
+        expect(target.instance_variable_get('@destroyed')).to be false
       end
     end
 
     context 'for persisted record' do
       before do
-        target.stub(:new_record?).and_return(false)
+        expect(target).to receive(:new_record?).at_least(1).times.and_return(false)
       end
 
       specify '#skip! should reload persisted record' do
-        target.should_receive(:reload)
+        expect(target).to receive(:reload)
         mapper.trait(:with_trait).skip!
       end
 
       specify '#use! should use all nested mountings' do
         mapper.trait(:with_trait).skip!
         mock = double('mounting')
-        mock.should_receive(:use!)
-        mapper.trait(:with_trait).stub(:all_nested_mountings).and_return([mock])
+        expect(mock).to receive(:use!)
+        expect(mapper.trait(:with_trait)).to receive(:all_nested_mountings).and_return([mock])
         mapper.trait(:with_trait).use!
       end
     end

@@ -20,9 +20,9 @@ describe FlatMap::Mapping::Reader::Formatted do
     end
 
     specify "#read should use formatting method for fetching a value" do
-      reader.read.should == 'FOOBAR'
-      reader.read(:downcase).should == 'foobar'
-      reader.read(:unknown).should == 'fOoBaR'
+      expect(reader.read           ).to eq 'FOOBAR'
+      expect(reader.read(:downcase)).to eq 'foobar'
+      expect(reader.read(:unknown )).to eq 'fOoBaR'
     end
   end
 
@@ -32,9 +32,9 @@ describe FlatMap::Mapping::Reader::Formatted do
 
       it "should use I18n_l to format value" do
         formatted_value = "le FooBar"
-        I18n.should_receive(:l).with(value).and_return(formatted_value)
+        expect(I18n).to receive(:l).with(value).and_return(formatted_value)
 
-        reader.read.should == formatted_value
+        expect(reader.read).to eq formatted_value
       end
     end
 
@@ -49,13 +49,13 @@ describe FlatMap::Mapping::Reader::Formatted do
       let(:reader){ described_class.new(mapping, :enum) }
 
       it "should use the name property of the target object for value" do
-        enum.should_receive(:name).and_return(value)
-        reader.read.should == value
+        expect(enum).to receive(:name).and_return(value)
+        expect(reader.read).to eq value
       end
 
       it "should be able to use the desired method to get enum's property" do
-        enum.should_receive(:description).and_return(value)
-        reader.read(:description).should == value
+        expect(enum).to receive(:description).and_return(value)
+        expect(reader.read(:description)).to eq value
       end
     end
   end

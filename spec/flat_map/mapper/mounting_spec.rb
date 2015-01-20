@@ -75,7 +75,7 @@ module FlatMap
 
     context 'defining mountings' do
       it "should use Factory for defining mappings" do
-        Mapper::Factory.should_receive(:new).
+        expect(Mapper::Factory).to receive(:new).
                         with(:foo, :mapper_class_name => 'FooMapper').
                         and_call_original
 
@@ -85,75 +85,75 @@ module FlatMap
     end
 
     describe 'properties' do
-      it{ mapper.hosted?.should be false }
-      it{ mounting.hosted?.should be true }
-      it{ mounting.host.should == mapper }
+      it{ expect(mapper.hosted?  ).to be false }
+      it{ expect(mounting.hosted?).to be true }
+      it{ expect(mounting.host   ).to eq mapper }
     end
 
     it 'should be able to access mapping by name' do
-      mapper.mounting(:spec_mount).should be_a(FlatMap::Mapper)
-      mapper.mounting(:undefined_mount).should be_nil
+      expect(mapper.mounting(:spec_mount     )).to be_a(FlatMap::Mapper)
+      expect(mapper.mounting(:undefined_mount)).to be_nil
     end
 
     describe "#read" do
       it 'should add mounted mappers to a result' do
-        mapper.read.should == {
+        expect(mapper.read).to eq({
           :host_attr     => 'attr',
           :attr_a        => 'a',
           :mapped_attr_b => 'b'
-        }
+        })
       end
 
       it 'should define dynamic writer methods' do
-        mapper.respond_to?(:attr_a).should be true
-        mapper.method(:attr_a).should_not  be nil
+        expect(mapper.respond_to?(:attr_a)).to     be true
+        expect(mapper.method(:attr_a     )).not_to be nil
 
-        mapper.respond_to?(:mapped_attr_b).should be true
-        mapper.method(:mapped_attr_b).should_not  be nil
+        expect(mapper.respond_to?(:mapped_attr_b)).to     be true
+        expect(mapper.method(:mapped_attr_b     )).not_to be nil
       end
     end
 
     describe "#write" do
       it 'should define dynamic writer methods' do
-        mapper.respond_to?(:attr_a=).should be true
-        mapper.method(:attr_a=).should_not  be nil
+        expect(mapper.respond_to?(:attr_a=)).to     be true
+        expect(mapper.method(:attr_a=     )).not_to be nil
 
-        mapper.respond_to?(:mapped_attr_b=).should be true
-        mapper.method(:mapped_attr_b=).should_not  be nil
+        expect(mapper.respond_to?(:mapped_attr_b=)).to     be true
+        expect(mapper.method(:mapped_attr_b=     )).not_to be nil
       end
 
       it 'should pass values to mounted mappers' do
         target = MountingSpec.mount_target
         mapper.write :attr_a => 'A', :mapped_attr_b => 'B'
-        target.attr_a.should == 'A'
-        target.attr_b.should == 'B'
+        expect(target.attr_a).to eq 'A'
+        expect(target.attr_b).to eq 'B'
       end
     end
 
     it 'should delegate missing methods to mounted mappers' do
-      expect{ mapper.a_method.should == 'a value' }.not_to raise_error
+      expect{ expect(mapper.a_method).to eq 'a value' }.not_to raise_error
     end
 
     specify '#before_save_mountings' do
-      mapper.before_save_mountings.should == [mapper.mounting(:spec_mount_before)]
+      expect(mapper.before_save_mountings).to eq [mapper.mounting(:spec_mount_before)]
     end
 
     specify '#after_save_mountings' do
-      mapper.after_save_mountings.should == [mapper.mounting(:spec_mount)]
+      expect(mapper.after_save_mountings).to eq [mapper.mounting(:spec_mount)]
     end
 
     context 'with suffix' do
       let(:mapper){ MountingSuffixSpec::SpecMapper.new(OpenStruct.new) }
       let(:mounting){ mapper.mounting(:mount_foo) }
 
-      it{ mapper.should_not be_suffixed }
-      it{ mounting.should be_suffixed }
+      it{ expect(mapper  ).not_to be_suffixed }
+      it{ expect(mounting).to be_suffixed }
 
       it 'should cascade to nested mappings' do
         mapper.attr_mount_foo  = 'foo'
         mapper.attr_nested_foo = 'bar'
 
-        mapper.read.should include({
+        expect(mapper.read).to include({
           :attr_mount_foo  => 'foo',
           :attr_nested_foo => 'bar' })
       end

@@ -31,13 +31,13 @@ module FlatMap
   describe 'Mapping' do
     context 'defining mappings' do
       it "should use Factory for defining mappings" do
-        MappingSpec::EmptyMapper.should_receive(:define_mappings).once.
+        expect(MappingSpec::EmptyMapper).to receive(:define_mappings).once.
           with({:attr_a => :attr_a, :mapped_attr_b => :attr_b}, {:writer => false}).
           and_call_original
-        Mapping::Factory.should_receive(:new).
+        expect(Mapping::Factory).to receive(:new).
                          with(:attr_a, :attr_a, :writer => false).
                          and_call_original
-        Mapping::Factory.should_receive(:new).
+        expect(Mapping::Factory).to receive(:new).
                          with(:mapped_attr_b, :attr_b, :writer => false).
                          and_call_original
 
@@ -48,36 +48,36 @@ module FlatMap
     end
 
     specify 'mapper class should have defined mappings' do
-      MappingSpec::SpecMapper.mappings.size.should == 4
-      MappingSpec::SpecMapper.mappings.all?{ |m| m.is_a?(Mapping::Factory) }.should be true
+      expect(MappingSpec::SpecMapper.mappings.size).to eq 4
+      expect(MappingSpec::SpecMapper.mappings.all?{ |m| m.is_a?(Mapping::Factory) }).to be true
     end
 
     context "for initialized mapper" do
-      let(:target){ MappingSpec::SpecTarget.new('a', 'b', 'c', 'd') }
-      let(:mapper){ MappingSpec::SpecMapper.new(target) }
+      let(:target) { MappingSpec::SpecTarget.new('a', 'b', 'c', 'd') }
+      let(:mapper) { MappingSpec::SpecMapper.new(target) }
 
       it "should be able to access mapping by its name" do
-        mapper.mapping(:mapped_attr_a).should be_a(FlatMap::Mapping)
-        mapper.mapping(:not_defined).should be_nil
+        expect(mapper.mapping(:mapped_attr_a)).to be_a(FlatMap::Mapping)
+        expect(mapper.mapping(:not_defined  )).to be_nil
       end
 
       describe 'reading and writing' do
         it "should be able to read from target via brackets" do
-          mapper[:mapped_attr_a].should == 'a'
+          expect(mapper[:mapped_attr_a]).to eq 'a'
         end
 
         it 'should be able to write to target via brackets' do
           mapper[:attr_b] = 'B'
-          target.attr_b.should == 'B'
+          expect(target.attr_b).to eq 'B'
         end
 
         it '#read should read all mappings to a hash' do
-          mapper.read.should == {
+          expect(mapper.read).to eq({
             :mapped_attr_a => 'a',
             :attr_b        => 'b',
             :attr_c        => 'attr_c-c',
             :mapped_attr_d => 'mapped_attr_d-d'
-          }
+          })
         end
 
         it '#write should assign values using mappings, ignoring invalid ones' do
@@ -87,10 +87,10 @@ module FlatMap
             :attr_c        => 'new-c',
             :mapped_attr_d => 'new-d'
 
-          target.attr_a.should == 'A'
-          target.attr_b.should == 'B'
-          target.attr_c.should == 'NEW-C'
-          target.attr_d.should == 'NEW-D'
+          expect(target.attr_a).to eq 'A'
+          expect(target.attr_b).to eq 'B'
+          expect(target.attr_c).to eq 'NEW-C'
+          expect(target.attr_d).to eq 'NEW-D'
         end
       end
     end

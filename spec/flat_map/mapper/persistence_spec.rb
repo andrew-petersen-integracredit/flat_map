@@ -66,7 +66,7 @@ module FlatMap
       let(:mapper){ PersistenceSpec::TargetClassMapper.new(target){} }
 
       specify '#model_name' do
-        expect(mapper.model_name).to eq 'mapper'
+        expect(mapper.model_name).to respond_to :human
       end
 
       specify '#to_key should delegate to target' do

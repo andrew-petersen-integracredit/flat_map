@@ -55,13 +55,6 @@ module FlatMap
       end
     end
 
-    # Return a 'mapper' string as a model_name. Used by Rails FormBuilder.
-    #
-    # @return [String]
-    def model_name
-      'mapper'
-    end
-
     # Delegate to the target's #to_key method.
     # @return [String]
     def to_key

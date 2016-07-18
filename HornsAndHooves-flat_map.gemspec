@@ -23,7 +23,7 @@ Gem::Specification.new do |s|
   s.add_dependency(%q<activerecord>, ["> 4.0", "< 5"])
   s.add_dependency(%q<yard>, [">= 0"])
 
-  s.add_development_dependency "rspec"
+  s.add_development_dependency "rspec", ['~> 3.5']
   s.add_development_dependency "rspec-its"
   s.add_development_dependency "rake"
 end

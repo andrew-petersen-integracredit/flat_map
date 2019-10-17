@@ -1,21 +1,20 @@
 source "https://rubygems.org"
 
+ruby "2.4.6"
+
 # Specify your gem's dependencies in flat_map.gemspec
 gemspec
 
-group :development do
-  gem 'redcarpet'
-  gem 'yard'
-end
+gem "activerecord", "~> 5.2"
+gem "activesupport", "~> 5.2"
 
-group :development, :test do
-  # code metrics:
-  gem "metric_fu"
-  gem "pry"
-end
+gem 'redcarpet'
+gem 'yard'
 
-group :test do
-  gem 'colorize'           , :require => false
-  gem 'simplecov'          , :require => false
-  gem 'simplecov-rcov-text', :require => false
-end
+# code metrics:
+gem "metric_fu"
+gem "pry"
+
+gem 'colorize'           , :require => false
+gem 'simplecov'          , :require => false
+gem 'simplecov-rcov-text', :require => false

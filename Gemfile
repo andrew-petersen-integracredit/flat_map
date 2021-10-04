@@ -1,12 +1,10 @@
 source "https://rubygems.org"
 
-ruby "2.4.6"
-
 # Specify your gem's dependencies in flat_map.gemspec
 gemspec
 
-gem "activerecord", "~> 5.2"
-gem "activesupport", "~> 5.2"
+gem "activerecord"
+gem "activesupport"
 
 gem 'redcarpet'
 gem 'yard'

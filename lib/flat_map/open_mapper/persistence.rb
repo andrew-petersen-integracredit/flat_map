@@ -133,7 +133,7 @@ module FlatMap
     # @return [Array<ActiveModel::Errors>]
     def consolidate_errors!
       mountings.map(&:errors).each do |errs|
-        errors.messages.merge!(errs.to_hash){ |key, old, new| old.concat(new) }
+        errors.merge!(errs)
       end
     end
     private :consolidate_errors!

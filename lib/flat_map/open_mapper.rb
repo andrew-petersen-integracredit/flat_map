@@ -16,6 +16,7 @@ module FlatMap
 
     autoload :Mapping
     autoload :Mounting
+    autoload :JoinsList
     autoload :Traits
     autoload :Factory
     autoload :AttributeMethods
@@ -24,6 +25,7 @@ module FlatMap
 
     include Mapping
     include Mounting
+    include JoinsList
     include Traits
     include AttributeMethods
     include ActiveModel::Validations

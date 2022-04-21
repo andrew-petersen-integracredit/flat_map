@@ -184,11 +184,11 @@ module FlatMap
   class ModelMapper < OpenMapper
     extend ActiveSupport::Autoload
 
-    autoload :AssociationsList
+    autoload :Associations
     autoload :Persistence
     autoload :Skipping
 
-    include AssociationsList
+    include Associations
     include Persistence
     include Skipping
 

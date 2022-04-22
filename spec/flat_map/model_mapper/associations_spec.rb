@@ -44,6 +44,8 @@ module FlatMap
           "tags"     => Reflection.new(Tag)
         }
       end
+
+      def self.joins(associations); end
     end
 
     # Mappers for models.
@@ -79,7 +81,18 @@ module FlatMap
       end
     end
 
-    describe ".associations_for_traits" do
+    describe ".relation" do
+      let(:relation) { double }
+      subject { ArticleMapper.relation(%i[ with_comments with_author ]) }
+
+      it "generates active record relation with correct associations" do
+        expect(Article).to receive(:includes).with({ comments: :author }).and_return(relation)
+
+        is_expected.to eq relation
+      end
+    end
+
+    describe ".associations" do
       subject { ArticleMapper.associations(traits) }
 
       context "one mounted class" do

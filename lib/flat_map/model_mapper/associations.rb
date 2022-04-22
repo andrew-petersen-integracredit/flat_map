@@ -9,6 +9,31 @@ module FlatMap
 
     # ModelMethods class macros
     module ClassMethods
+      # Build relation for given traits.
+      # Allows to create relation which loads data from all tables related to given traits.
+      # For example:
+      #
+      # class CommentMapper < FlatMap::ModelMapper
+      # end
+      #
+      # class ArticleMapper < FlatMap::ModelMapper
+      #   trait :with_comments do
+      #     mount :comments, mapper_class: CommentMapper
+      #   end
+      # end
+      #
+      # Following call:
+      # ArticleMapper.relation(%i[with_comments]).where(...)
+      #
+      # is same as:
+      # Article.includes(:comments).where(...)
+      #
+      #
+      # @param traits [Array<Symbol>]
+      # @return [ActiveRecord::Relation]
+      def relation(traits)
+        target_class.includes(associations(traits))
+      end
 
       # Return associations list for given traits based on current mapper mounding.
       # This method allows to receive associations list for given traits.

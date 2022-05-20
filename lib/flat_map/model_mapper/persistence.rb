@@ -19,12 +19,24 @@ module FlatMap
       # Find a record of the +target_class+ by +id+ and use it as a
       # target for a new mapper, with a list of passed +traits+ applied
       # to it.
+      # When `preload: true` option passed calls mapper `relation` method
+      # with traits list. This allows to load all related objects in one query.
       #
       # @param [#to_i] id of the record
       # @param [*Symbol] traits
       # @return [FlatMap::Mapper] mapper
       def find(id, *traits, &block)
-        new(target_class.find(id), *traits, &block)
+        options = { preload: false }
+
+        options.merge!(traits.extract_options!)
+
+        if options[:preload]
+          record = relation(traits).find(id)
+        else
+          record = target_class.find(id)
+        end
+
+        new(record, *traits, &block)
       end
 
       # Fetch a class for the target of the mapper.

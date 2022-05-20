@@ -54,10 +54,21 @@ module FlatMap
     describe '.find' do
       let(:target){ PersistenceSpec::TargetClass.new('a', 'b') }
 
-      it 'should delegate to target class to find object for mapper' do
-        expect(PersistenceSpec::TargetClass).to receive(:find).with(1).and_return(target)
-        expect(PersistenceSpec::TargetClassMapper).to receive(:new).with(target, :used_trait)
-        PersistenceSpec::TargetClassMapper.find(1, :used_trait)
+      context "with preload" do
+        it 'should preload tables and find object for mapper' do
+          expect(PersistenceSpec::TargetClassMapper).to receive_message_chain(:relation, :find).
+            with([:used_trait]).with(1).and_return(target)
+          expect(PersistenceSpec::TargetClassMapper).to receive(:new).with(target, :used_trait)
+          PersistenceSpec::TargetClassMapper.find(1, :used_trait, preload: true)
+        end
+      end
+
+      context "without preload" do
+        it 'should delegate to target class to find object for mapper' do
+          expect(PersistenceSpec::TargetClass).to receive(:find).with(1).and_return(target)
+          expect(PersistenceSpec::TargetClassMapper).to receive(:new).with(target, :used_trait)
+          PersistenceSpec::TargetClassMapper.find(1, :used_trait)
+        end
       end
     end
 

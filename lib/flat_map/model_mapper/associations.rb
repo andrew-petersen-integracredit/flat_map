@@ -32,10 +32,11 @@ module FlatMap
       # @param traits [Array<Symbol>]
       # @return [ActiveRecord::Relation]
       def relation(traits)
-        target_class.includes(associations(traits))
+        trait_associations = associations(traits)
+        target_class.includes(trait_associations).references(trait_associations)
       end
 
-      # Return associations list for given traits based on current mapper mounding.
+      # Return associations list for given traits based on current mapper mounting.
       # This method allows to receive associations list for given traits.
       # Then associations list could be used as parameters for .joins method
       # to build active record relation to select data form tables related to traits.
@@ -77,24 +78,24 @@ module FlatMap
       #
       #
       # @param traits [Array<Symbol>]
-      # @return       [Array|Hash]
+      # @return       [Array,Hash]
       def associations(traits)
         build_associations(traits, target_class, false)
       end
 
-      # Return associations list for given traits based on current mapper mounding.
+      # Return associations list for given traits based on current mapper mounting.
       #
       # @param traits       [Array<Symbol>]
       # @param context      [ActiveRecord::Base]
       # @param include_self [Boolean]
-      # @return             [Array|Hash]
+      # @return             [Array,Hash]
       protected def build_associations(traits, context, include_self)
         classes_list = find_dependency_classes(traits)
 
         map_classes_to_associations(context, classes_list, include_self)
       end
 
-      # Return associations list for given traits based on current mapper mounding.
+      # Return associations list for given traits based on current mapper mounting.
       #
       # @param traits [Array<Symbol>]
       # @return       [Array<Symbol>]
@@ -114,9 +115,10 @@ module FlatMap
       #
       # @param context      [ActiveRecord::Base]
       # @param classes_list [Array<ActiveRecord::Base>]
-      # @return             [Symbol|Array|Hash]
+      # @param include_self [Boolean]
+      # @return             [Symbol,Array,Hash,nil]
       private def map_classes_to_associations(context, classes_list, include_self)
-        if classes_list.count.zero?
+        if classes_list.empty?
           include_self ? association_for_class(context) : nil
         else
           classes_list = classes_list.first if classes_list.length == 1
@@ -128,7 +130,7 @@ module FlatMap
       # Return association name for target_class in given context.
       #
       # @param context [ActiveRecord::Base]
-      # #return        [Symbol|nil]
+      # #return        [Symbol,nil]
       private def association_for_class(context)
         reflection = context.reflections.find do |_, reflection|
           reflection.klass == target_class

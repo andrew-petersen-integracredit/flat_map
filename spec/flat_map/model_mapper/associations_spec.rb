@@ -86,7 +86,9 @@ module FlatMap
       subject { ArticleMapper.relation(%i[ with_comments with_author ]) }
 
       it "generates active record relation with correct associations" do
-        expect(Article).to receive(:includes).with({ comments: :author }).and_return(relation)
+        expect(Article).to receive_message_chain(:includes, :references).
+          with({ comments: :author }).with({ comments: :author }).
+          and_return(relation)
 
         is_expected.to eq relation
       end

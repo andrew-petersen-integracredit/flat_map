@@ -1,3 +1,3 @@
 module FlatMap # :nodoc:
-  VERSION = "0.5.0" # :nodoc:
+  VERSION = "0.6.0" # :nodoc:
 end
